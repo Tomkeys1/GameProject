@@ -1,0 +1,30 @@
+#include "resource.h"
+
+// Icon with lowest ID value placed first to ensure
+// the application icon remains consistent on all systems
+IDI_APPICON ICON DISCARDABLE "icon.ico"
+
+1 VERSIONINFO
+FILEVERSION		1, 0, 0, 0
+PRODUCTVERSION	1, 0, 0, 0
+BEGIN
+BLOCK "StringFileInfo"
+BEGIN
+BLOCK "040904E4"
+BEGIN
+VALUE "CompanyName", "RaffiCorp"
+VALUE "FileDescription", "DirectX Rendering"
+VALUE "FileVersion", "1.0.0.0"
+VALUE "InternalName", "Raffis Testaufgabe"
+VALUE "LegalCopyright", "RaffiCorp"
+VALUE "OriginalFilename", "RaffisTestaufgabe.exe"
+VALUE "ProductName", "RaffiCorp Rendering"
+VALUE "ProductVersion", "1.0.0.0"
+END
+END
+BLOCK "VarFileInfo"
+BEGIN
+// Translation Values: German / U.S. English
+VALUE "Translation", 0x407, 1252, 0x409, 1252
+END
+END
