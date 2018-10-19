@@ -253,16 +253,15 @@ namespace Math
 	}
 
 
-	inline Mat4x4 CreateProjectionMatrix(real fov, real gfov, real nearC, real farC)
+	inline Mat4x4 CreateProjectionMatrix(real width, real height, real nearC, real farC)
 	{
-		real alpha = 1 / tan(fov * 0.5 * 3.141592f / 180);
 
 		return Mat4x4
 		{
-			alpha, 0, 0, 0,
-			0, alpha, 0, 0,
-			0, 0, -farC / (farC - nearC), -1,
-			0, 0, -farC * nearC / (farC - nearC), 1,
+			2.0f / width, 0, 0, 0,
+			0, 2.0f / height, 0, 0,
+			0, 0, 1.0f / (farC - nearC), 0,
+			0, 0, -nearC / (farC - nearC), 1,
 		};
 	}
 }

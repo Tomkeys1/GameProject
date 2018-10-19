@@ -11,7 +11,7 @@ Camera::Camera(real width, real height, real nearC, real farC)
 	this->mNearClip = nearC;
 	this->mFarClip = farC;
 
-	this->gameobject->GetTransform().position = { 0, 0, -10 };
+	this->gameobject->GetTransform().position = { 0, 0, -5 };
 	this->initialPosition = this->gameobject->GetTransform().position;
 }
 
@@ -27,32 +27,24 @@ void Camera::LookAt(const Transform& objectTransform)
 
 	C = this->gameobject->GetTransform().position;
 
-	Z = C - objectTransform.position;
-	Math::Normalize(Z);
+	//Z = objectTransform.position - C;
+	//Math::Normalize(Z);
+	Z = Math::Vec3::unit_z;
 
-	X = Math::Cross(Z, Math::Vec3::unit_y);
+	X = Math::Cross(Math::Vec3::unit_y, Z);
 	Math::Normalize(X);
 
-	Y = Math::Cross(X, Z);
-	Math::Normalize(Y);
+	Y = Math::Cross(Z, X);
 
-	Math::Mat4x4 rotation = 
+	Math::Mat4x4 matrix = 
 	{
-		X.x, Y.x, -Z.x, 0,
-		X.y, Y.y, -Z.y, 0,
-		X.z, Y.z, -Z.z, 0,
-		0, 0, 0, 1
+		X.x, Y.x, Z.x, 0,
+		X.y, Y.y, Z.y, 0,
+		X.z, Y.z, Z.z, 0,
+		-Math::Dot(X, C), -Math::Dot(Y, C), -Math::Dot(Z, C), 1
 	};
 
-	Math::Mat4x4 translation = 
-	{
-		1, 0, 0, -C.x,
-		0, 1, 0, -C.y,
-		0, 0, 1, -C.z,
-		0, 0, 0, 0
-	};
-
-	this->viewMatrix = translation * rotation;
+	this->viewMatrix = Math::Transpose(matrix);
 }
 
 void Camera::Follow(const Transform& objectTransform, Math::Vec3 offset)
@@ -75,8 +67,9 @@ Math::Mat4x4 Camera::GetMVP(Transform objectTransform)
 	LookAt(objectTransform);
 
 	Math::Mat4x4 worldMatrix = Math::Mat4x4::identity;
-	Math::Mat4x4 modelMatrix = Math::CreateTranslationMatrix(objectTransform.position) * Math::CreateRotationMatrix(rotation) * Math::CreateScalingMatrix(objectTransform.scaling);
-	worldMatrix = worldMatrix * modelMatrix;
+	worldMatrix = worldMatrix * Math::CreateScalingMatrix(objectTransform.scaling);
+	worldMatrix = worldMatrix * Math::CreateRotationMatrix(rotation);
+	worldMatrix = worldMatrix * Math::CreateTranslationMatrix(objectTransform.position);
 
 	Math::Mat4x4 viewMatrix = Math::Mat4x4::identity;
 	viewMatrix = viewMatrix * this->viewMatrix;
@@ -89,8 +82,6 @@ Math::Mat4x4 Camera::GetMVP(Transform objectTransform)
 	mvp = mvp * projectionMatrix;
 	mvp = mvp * viewMatrix;
 	mvp = mvp * worldMatrix;
-
-	Math::Transpose(mvp);
 
 	return mvp;
 }

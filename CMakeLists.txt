@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.9)
 
-project(Game)
-set(TARGET_NAME Game)
+project(GameProject)
+set(TARGET_NAME GameProject)
 
 set(CMAKE_CXX_STANDARD 17)
 
