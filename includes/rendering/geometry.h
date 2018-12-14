@@ -5,28 +5,29 @@
 //INTERNAL INCLUDES
 #include "typedefs/transform.h"
 
-class Transform;
+class Gameobject;
 
 //Class ShaderGeometry.
 class Geometry 
 {
-	//Declare the struct Vertex.
-	struct Vertex 
-	{
-		fColorRGBA position;
-		fColorRGBA color;
-	};
-
 //Declare public functions
 public:
+	Geometry(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, Gameobject* gb);
+
 	void Initialize(ID3D11Device* dev);
 	void Render(ID3D11DeviceContext* devcon);
 	void Cleanup(void);
-	Transform GetTransform(void);
+	Gameobject* GetGameobject(void);
 
 //Declare private variables.
 private:
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
-	Transform transform;
+	Gameobject* gameobject;
+
+	Vertex* vertices;
+	ui32* indicies;
+
+	ui32 vLength;
+	ui32 iLength;
 };

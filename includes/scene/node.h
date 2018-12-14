@@ -20,7 +20,9 @@ public:
 	virtual void MakeRoot(void);
 
 	virtual void AddChild(Node* node);
+	virtual void GetAllChildren(Node* root, std::list<Node*>& list);
 
+	virtual bool hasChildren();
 
 	virtual void operator+=(Node* child);
 	virtual void operator-=(Node* child);

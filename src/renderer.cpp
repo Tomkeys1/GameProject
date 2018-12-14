@@ -7,13 +7,13 @@
 #include "rendering/camera.h"
 #include "typedefs/transform.h"
 #include "scene/gameobject.h"
+#include "application.h"
 
 
 //Void Initialize
-void Renderer::Initialize(ui32 displayID, ui32 adapterID, HWND targetWindow)
+void Renderer::Initialize(std::vector<Gameobject*> gbList, ui32 displayID, ui32 adapterID, HWND targetWindow)
 {
-	this->shaderInstance = new Shader;
-	this->model = new Geometry;
+	this->gameObjects = gbList;
 
 	//Get the Adapters.
 	GetAdapters();
@@ -96,8 +96,15 @@ void Renderer::Initialize(ui32 displayID, ui32 adapterID, HWND targetWindow)
 
 	this->camera = new Camera(static_cast<real>(Window::GetInstance().widthOfWindow), static_cast<real>(Window::GetInstance().heightOfWindow), 0.0f, 10.0f);
 
-	shaderInstance->Initialize(dev, targetWindow);
-	model->Initialize(dev);
+	for (Gameobject* gb : this->gameObjects)
+	{
+		if (gb->hasMesh())
+		{
+			gb->GetMesh()->Initialize(dev);
+			gb->GetMaterial()->Initialize(dev, targetWindow);
+		}
+	}
+
 
 	dev->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer);
 	devcon->OMSetRenderTargets(1, &backbuffer, NULL);
@@ -120,12 +127,7 @@ void Renderer::Render(void)
 	//Set the color to the backbuffer
 	devcon->ClearRenderTargetView(backbuffer, reinterpret_cast<FLOAT*>(&color));
 
-	model->Render(devcon);
-	Math::Mat4x4 mvp = this->camera->GetMVP(model->GetTransform());
-
-	LOG("%f", model->GetTransform().position.x);
-
-	this->shaderInstance->Render(devcon, 6, mvp);
+	//Math::Mat4x4 mvp = this->camera->GetMVP(model->GetTransform())
 
 	//Render the image.
 	swapchain->Present(0, 0);

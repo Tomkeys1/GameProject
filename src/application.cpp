@@ -20,25 +20,55 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 	//Create the scenegraph root.
 	this->root = new Gameobject;
 	this->root->SetName("root");
-	this->root->MakeRoot();
 
 	//Create gameobjects.
 	Gameobject* player1 = new Gameobject;
 	Gameobject* player2 = new Gameobject;
-	Gameobject* player3 = new Gameobject;
-	Gameobject* player4 = new Gameobject;
+
+	//Add childs.
+	this->root->AddChild(player1);
+	this->root->AddChild(player2);
+
+	std::list<Node*> test;
+	std::vector<Gameobject*> gameObjects;
+	
+	this->root->GetAllChildren(this->root, test);
+
+	for (Node* node : test)
+	{
+		gameObjects.push_back(reinterpret_cast<Gameobject*>(node));
+	}
 
 	//Set gameobjects names.
 	player1->SetName("player1");
 	player2->SetName("player2");
-	player3->SetName("player3");
-	player4->SetName("player4");
 
-	//Add childs.
-	this->root->AddChild(player1);
-	player1->AddChild(player2);
-	player1->AddChild(player3);
-	player2->AddChild(player4);
+	Vertex* v = new Vertex[4];
+	ui32* i = new ui32[6];
+
+	v[0].position = fColorRGBA{ -1, 1, 0, 1.0f };
+	v[0].color = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f };
+	
+	v[1].position = fColorRGBA{ 1, 1, 0, 1.0f };
+	v[1].color = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f };
+	
+	v[2].position = fColorRGBA{ 1, -1, 0, 1.0f };
+	v[2].color = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f };
+	
+	v[3].position = fColorRGBA{ -1, -1, 0, 1.0f };
+	v[3].color = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f };
+
+	i[0] = 3;
+	i[1] = 0;
+	i[2] = 1;
+	i[3] = 3;
+	i[4] = 1;
+	i[5] = 2;
+
+
+	player2->SetMeshData(v, i, 4, 6);
+	player1->SetMeshData(v, i, 4, 6);
+
 
 	//Create and initialize a new movment component.
 	Movement* mov = new Movement;
@@ -50,7 +80,8 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 	//Create and initialize the renderer.
 	Application::renderer = new Renderer;
 	Application::filesystem = new Filesystem;
-	Application::renderer->Initialize(displayID);
+	Application::renderer->Initialize(gameObjects, displayID);
+
 }
 
 //Void Update

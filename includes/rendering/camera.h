@@ -12,10 +12,10 @@ class Camera
 public:
 	Camera(real width, real height, real nearC, real farC);
 
-	void LookAt(const Transform& objectTransform);
-	void Follow(const Transform& objectTransform, Math::Vec3 offset);
+	void CreateViewMatrix();
+	void Follow(const Transform& objectTransform);
 	void CleanUp(void);
-	Math::Mat4x4 GetMVP(Transform object);
+	Math::Mat4x4 GetVP();
 	Gameobject* GetGameobject(void) const;
 
 private:

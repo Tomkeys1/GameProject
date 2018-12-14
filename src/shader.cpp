@@ -8,14 +8,20 @@
 #include "typedefs/utils.h"
 #include "application.h"
 
+Shader::Shader(const char* vs, const char* ps)
+{
+	this->vsFilename = vs;
+	this->psFilename = ps;
+}
+
 //Void Initialize
 void Shader::Initialize(ID3D11Device* dev, HWND window)
 {
 	HRESULT hr = 0;
 
 	//Get the shaderfiles.
-	WinFile* vertexShaderFile = new WinFile(Application::GetInstancePtr()->GetFilesystem()->FileInDirectory("shader", "defaultvs.shader").c_str());
-	WinFile* pixelShaderFile = new WinFile(Application::GetInstancePtr()->GetFilesystem()->FileInDirectory("shader", "defaultps.shader").c_str());
+	WinFile* vertexShaderFile = new WinFile(Application::GetInstancePtr()->GetFilesystem()->FileInDirectory("shader", this->vsFilename).c_str());
+	WinFile* pixelShaderFile = new WinFile(Application::GetInstancePtr()->GetFilesystem()->FileInDirectory("shader", this->psFilename).c_str());
 
 	V_RETURN(dev->CreateVertexShader(vertexShaderFile->Read(), vertexShaderFile->GetSize(), NULL, &this->mvertexShader));
 	V_RETURN(dev->CreatePixelShader(pixelShaderFile->Read(), pixelShaderFile->GetSize(), NULL, &this->mpixelShader));
@@ -51,9 +57,9 @@ void Shader::Initialize(ID3D11Device* dev, HWND window)
 }
 
 //Void Render
-void Shader::Render(ID3D11DeviceContext* devcon, ui32 indexCount, Math::Mat4x4 mvp)
+void Shader::Render(ID3D11DeviceContext* devcon, ui32 indexCount, Math::Mat4x4 vp)
 {
-	SetShaderParameters(devcon, mvp);
+	SetShaderParameters(devcon, vp);
 
 	devcon->IASetInputLayout(mlayout);
 
@@ -76,12 +82,12 @@ void Shader::Cleanup(void)
 }
 
 //SetShaderParameters
-void Shader::SetShaderParameters(ID3D11DeviceContext* devcon, Math::Mat4x4 mvp)
+void Shader::SetShaderParameters(ID3D11DeviceContext* devcon, Math::Mat4x4 vp)
 {
 	HRESULT hr = 0;
 
 	ui32 bufferIndex = 0;
 
-	devcon->UpdateSubresource(this->m_matrixBuffer, 0, NULL, &mvp, 0, 0);
+	devcon->UpdateSubresource(this->m_matrixBuffer, 0, NULL, &vp, 0, 0);
 	devcon->VSSetConstantBuffers(bufferIndex, 1, &m_matrixBuffer);
 }

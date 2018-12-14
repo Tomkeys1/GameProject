@@ -6,6 +6,7 @@
 //INTERNAL INCLUDES
 #include "typedefs/types.h"
 #include "math/vector3.h"
+#include "math/quaternion.h"
 
 //Namespace Math
 namespace Math
@@ -234,6 +235,17 @@ namespace Math
 			-sin(thetha), cos(thetha), 0, 0,
 			0, 0, 1, 0,
 			0, 0, 0, 1
+		};
+	}
+
+	inline Mat4x4 CreateRotationMatrix2(const Quaternion& rotation)
+	{
+		return Mat4x4
+		{
+			1.0f - 2.0f * rotation.y * rotation.y - 2.0f * rotation.z * rotation.z, 2.0f * rotation.x * rotation.y - 2.0f * rotation.z * rotation.w, 2.0f * rotation.x * rotation.z + 2.0f * rotation.y * rotation.w, 0.0f,
+			2.0f * rotation.x * rotation.y + 2.0f * rotation.z * rotation.w, 1.0f - 2.0f * rotation.x * rotation.x - 2.0f * rotation.z * rotation.z, 2.0f * rotation.y * rotation.z - 2.0f * rotation.x * rotation.w, 0.0f,
+			2.0f * rotation.x * rotation.z - 2.0f * rotation.y * rotation.w, 2.0f * rotation.y * rotation.z + 2.0f * rotation.x * rotation.w, 1.0f - 2.0f * rotation.x * rotation.x - 2.0f * rotation.y * rotation.y, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
 		};
 	}
 

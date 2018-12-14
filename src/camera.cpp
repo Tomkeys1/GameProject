@@ -21,7 +21,7 @@ void Camera::CleanUp(void)
 	SAFE_DELETE(this->gameobject);
 }
 
-void Camera::LookAt(const Transform& objectTransform)
+void Camera::CreateViewMatrix()
 {
 	Math::Vec3 X, Y, Z, C;
 
@@ -44,27 +44,14 @@ void Camera::LookAt(const Transform& objectTransform)
 	this->viewMatrix = Math::Transpose(matrix);
 }
 
-void Camera::Follow(const Transform& objectTransform, Math::Vec3 offset)
+void Camera::Follow(const Transform& objectTransform)
 {
-	this->gameobject->GetTransform().position = objectTransform.position + offset;
+	this->gameobject->GetTransform().position = objectTransform.position;
 }
 
-Math::Mat4x4 Camera::GetMVP(Transform objectTransform)
+Math::Mat4x4 Camera::GetVP()
 { 
-	Math::Vec3 rotation;
-
-	rotation.x = objectTransform.rotation.x;
-	rotation.y = objectTransform.rotation.y;
-	rotation.z = objectTransform.rotation.z;
-
-	Math::Vec3 offset = this->initialPosition;
-
-	LookAt(objectTransform);
-
-	Math::Mat4x4 worldMatrix = Math::Mat4x4::identity;
-	worldMatrix = worldMatrix * Math::CreateScalingMatrix(objectTransform.scaling);
-	worldMatrix = worldMatrix * Math::CreateRotationMatrix(rotation);
-	worldMatrix = worldMatrix * Math::CreateTranslationMatrix(objectTransform.position);
+	CreateViewMatrix();
 
 	Math::Mat4x4 viewMatrix = Math::Mat4x4::identity;
 	viewMatrix = viewMatrix * this->viewMatrix;
@@ -72,9 +59,7 @@ Math::Mat4x4 Camera::GetMVP(Transform objectTransform)
 	Math::Mat4x4 projectionMatrix = Math::Mat4x4::identity; 
 	projectionMatrix = projectionMatrix * Math::CreateProjectionMatrix(this->width, this->height, this->mNearClip, this->mFarClip);
 
-	Math::Mat4x4 mvp = projectionMatrix * viewMatrix * worldMatrix;
-
-	return mvp;
+	return projectionMatrix * viewMatrix;
 }
 
 Gameobject* Camera::GetGameobject(void) const

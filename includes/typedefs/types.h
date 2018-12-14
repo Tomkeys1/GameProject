@@ -61,3 +61,9 @@ struct fColorRGBA
 	real b;
 	real a;
 };
+
+struct Vertex
+{
+	fColorRGBA position;
+	fColorRGBA color;
+};

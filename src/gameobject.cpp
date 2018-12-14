@@ -3,14 +3,19 @@
 //INTERNAL INCLUDES
 #include "scene/gameobject.h"
 #include "components/movement.h"
+#include "rendering/geometry.h"
+#include "rendering/shader.h"
 
 //Gameobject Constructor.
-Gameobject::Gameobject()
+Gameobject::Gameobject(const char* vsFilename, const char* psFilename)
 {
 	//Set this gameobjects position, scaling and rotation to 0;
 	this->transform.position = { 0, 0, 0 };
 	this->transform.scaling = { 0, 0, 0 };
 	this->transform.rotation = { 1, 0, 0, 0 };
+
+	this->material = new Shader(vsFilename, psFilename);
+	this->bMesh = false;
 }
 
 //Void Update
@@ -75,6 +80,22 @@ void Gameobject::DeleteComponent(Component* component)
 	}
 }
 
+void Gameobject::SetMeshData(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength)
+{
+	this->mesh = new Geometry(vertices, indicies, vLength, iLength, this);
+	this->bMesh = true;
+}
+
+Math::Mat4x4 Gameobject::GetModelMatrix(void)
+{
+	this->modelMatrix = Math::Mat4x4::identity;
+	modelMatrix = modelMatrix * Math::CreateScalingMatrix(this->transform.scaling);
+	modelMatrix = modelMatrix * Math::CreateRotationMatrix2(this->transform.rotation);
+	modelMatrix = modelMatrix * Math::CreateTranslationMatrix(this->transform.position);
+
+	return this->modelMatrix;
+}
+
 //GetTransform
 Transform& Gameobject::GetTransform(void)
 {
@@ -82,9 +103,26 @@ Transform& Gameobject::GetTransform(void)
 	return this->transform;
 }
 
+Geometry* Gameobject::GetMesh(void)
+{
+	return this->mesh;
+}
+
+Shader* Gameobject::GetMaterial(void)
+{
+	return this->material;
+}
+
 //Set name
 void Gameobject::SetName(char* gameobjectName)
 {
 	//Set this gameobjects name.
 	this->name = gameobjectName;
+}
+
+bool Gameobject::hasMesh()
+{
+	if (this->bMesh == true)
+		return true;
+	return false;
 }

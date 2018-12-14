@@ -90,6 +90,23 @@ void Node::AddChild(Node* node)
 	}
 }
 
+void Node::GetAllChildren(Node* root, std::list<Node*>& list)
+{
+	for (Node* node : root->children)
+	{
+		list.push_back(node);
+		if(node->hasChildren() == true)
+			GetAllChildren(node, list);
+	}
+}
+
+bool Node::hasChildren()
+{
+	if (this->children.size() != 0)
+		return true;
+	return false;
+}
+
 //Void Update
 void Node::Update(void)
 {

@@ -9,13 +9,14 @@
 class Shader;
 class Geometry;
 class Camera;
+class Gameobject;
 
 //Class Renderer
 class Renderer 
 {
 //Declare public functions.
 public: 
-	void Initialize(ui32 displayID = 0,ui32 adapterID = 0, HWND targetWindow = Window::GetInstance().handle);
+	void Initialize(std::vector<Gameobject*> gbList, ui32 displayID = 0, ui32 adapterID = 0, HWND targetWindow = Window::GetInstance().handle);
 	void Render(void);
 	void CleanUp(void);
 
@@ -30,9 +31,8 @@ private:
 	IDXGIAdapter* adapter;
 	IDXGIFactory* factory;
 	ID3D11RenderTargetView* backbuffer;
-	Shader* shaderInstance;
-	Geometry* model;
 	Camera* camera;
 
 	std::vector <IDXGIAdapter*> adapters;
+	std::vector <Gameobject*> gameObjects;
 };
