@@ -60,6 +60,8 @@ void Window::Instantiate(char* title, ui32 width, ui32 height, ui32 displayID)
 {
 	//Initialize variable
 	ui32 style = 0;
+	this->widthOfWindow = width;
+	this->heightOfWindow = height;
 
 	//Enumerate through the monitors and return if return if it wasnt succesful
 	if (!EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, 0))

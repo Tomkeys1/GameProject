@@ -261,7 +261,7 @@ namespace Math
 			2.0f / width, 0, 0, 0,
 			0, 2.0f / height, 0, 0,
 			0, 0, 1.0f / (farC - nearC), 0,
-			0, 0, -nearC / (farC - nearC), 1,
+			0, 0, nearC / (farC - nearC), 1,
 		};
 	}
 }

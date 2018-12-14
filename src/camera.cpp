@@ -26,9 +26,6 @@ void Camera::LookAt(const Transform& objectTransform)
 	Math::Vec3 X, Y, Z, C;
 
 	C = this->gameobject->GetTransform().position;
-
-	//Z = objectTransform.position - C;
-	//Math::Normalize(Z);
 	Z = Math::Vec3::unit_z;
 
 	X = Math::Cross(Math::Vec3::unit_y, Z);
@@ -62,8 +59,6 @@ Math::Mat4x4 Camera::GetMVP(Transform objectTransform)
 
 	Math::Vec3 offset = this->initialPosition;
 
-	//Follow(objectTransform, offset);
-
 	LookAt(objectTransform);
 
 	Math::Mat4x4 worldMatrix = Math::Mat4x4::identity;
@@ -77,11 +72,7 @@ Math::Mat4x4 Camera::GetMVP(Transform objectTransform)
 	Math::Mat4x4 projectionMatrix = Math::Mat4x4::identity; 
 	projectionMatrix = projectionMatrix * Math::CreateProjectionMatrix(this->width, this->height, this->mNearClip, this->mFarClip);
 
-	Math::Mat4x4 mvp = Math::Mat4x4::identity;
-
-	mvp = mvp * projectionMatrix;
-	mvp = mvp * viewMatrix;
-	mvp = mvp * worldMatrix;
+	Math::Mat4x4 mvp = projectionMatrix * viewMatrix * worldMatrix;
 
 	return mvp;
 }

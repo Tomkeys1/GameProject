@@ -30,4 +30,7 @@ protected:
 //Declare private variables.
 private:
 	std::vector<Display> displays;
+
+	real widthOfWindow;
+	real heightOfWindow;
 };

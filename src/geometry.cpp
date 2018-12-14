@@ -8,8 +8,8 @@
 void Geometry::Initialize(ID3D11Device* dev)
 {
 
-	this->transform.position = Math::Vec3{0.6f, 0.0f, 0.0f};
-	this->transform.scaling = Math::Vec3::unit_scale * 200.0f;
+	this->transform.position = Math::Vec3{0.0f, 0.0f, 0.0f};
+	this->transform.scaling = Math::Vec3::unit_scale * 100.0f;
 	this->transform.rotation = Math::Quaternion::identity;
 
 	//Initialize variables
@@ -81,8 +81,6 @@ void Geometry::Initialize(ID3D11Device* dev)
 //Void Render
 void Geometry::Render(ID3D11DeviceContext* devcon)
 {
-	this->transform.position.x -= 0.00001f;
-
 	//Define the size of struct Vertex.
 	ui32 pStrides = sizeof(Vertex);
 	ui32 offset = 0;

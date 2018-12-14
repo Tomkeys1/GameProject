@@ -94,7 +94,7 @@ void Renderer::Initialize(ui32 displayID, ui32 adapterID, HWND targetWindow)
 
 	//Create the RenderTarget view and set it to the output merger stage.
 
-	this->camera = new Camera(static_cast<real>(Window::GetInstance().GetDisplay(displayID)->width), static_cast<real>(Window::GetInstance().GetDisplay(displayID)->height), 0.0f, 10.0f);
+	this->camera = new Camera(static_cast<real>(Window::GetInstance().widthOfWindow), static_cast<real>(Window::GetInstance().heightOfWindow), 0.0f, 10.0f);
 
 	shaderInstance->Initialize(dev, targetWindow);
 	model->Initialize(dev);
