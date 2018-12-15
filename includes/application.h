@@ -26,6 +26,7 @@ public:
 	void Update(void);
 	void CleanUp(void);
 	Filesystem* GetFilesystem();
+	Renderer* GetRenderer();
 //Declare private variables
 private:
 	Filesystem* filesystem;

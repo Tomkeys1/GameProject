@@ -7,14 +7,14 @@
 #include "rendering/shader.h"
 
 //Gameobject Constructor.
-Gameobject::Gameobject(const char* vsFilename, const char* psFilename)
+Gameobject::Gameobject()
 {
 	//Set this gameobjects position, scaling and rotation to 0;
-	this->transform.position = { 0, 0, 0 };
-	this->transform.scaling = { 0, 0, 0 };
+	this->transform.position = { 0.5f, 0, 0 };
+	this->transform.scaling = { 100, 100, 100 };
 	this->transform.rotation = { 1, 0, 0, 0 };
 
-	this->material = new Shader(vsFilename, psFilename);
+	this->material = new Shader();
 	this->bMesh = false;
 }
 
@@ -52,6 +52,10 @@ void Gameobject::Cleanup(void)
 {
 	//Empty this gameobjects name.
 	this->name = "";
+
+	SAFE_DELETE(this->mesh);
+	SAFE_DELETE(this->material);
+
 }
 
 //Void AddComponent
@@ -83,6 +87,12 @@ void Gameobject::DeleteComponent(Component* component)
 void Gameobject::SetMeshData(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength)
 {
 	this->mesh = new Geometry(vertices, indicies, vLength, iLength, this);
+	this->bMesh = true;
+}
+
+void Gameobject::SetMeshData(fColorRGBA col)
+{
+	this->mesh = new Geometry(this, col);
 	this->bMesh = true;
 }
 

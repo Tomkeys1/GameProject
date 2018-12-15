@@ -16,3 +16,7 @@ void Movement::Update(void)
 	//Execute the components Update function.
 	Component::Update();
 }
+
+void Movement::Cleanup(void)
+{
+}

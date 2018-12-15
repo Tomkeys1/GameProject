@@ -92,6 +92,31 @@ void Renderer::Initialize(std::vector<Gameobject*> gbList, ui32 displayID, ui32 
 	devcon->RSSetViewports(1, &viewport);
 	devcon->RSSetState(pRasterizerState);
 
+	//Get the shaderfiles.
+	WinFile* vertexShaderFile = new WinFile(Application::GetInstancePtr()->GetFilesystem()->FileInDirectory("shader", "defaultvs.shader").c_str());
+	WinFile* pixelShaderFile = new WinFile(Application::GetInstancePtr()->GetFilesystem()->FileInDirectory("shader", "defaultps.shader").c_str());
+
+	V_RETURN(dev->CreateVertexShader(vertexShaderFile->Read(), vertexShaderFile->GetSize(), NULL, &this->mvertexShader));
+	V_RETURN(dev->CreatePixelShader(pixelShaderFile->Read(), pixelShaderFile->GetSize(), NULL, &this->mpixelShader));
+
+	//Create input layout
+	D3D11_INPUT_ELEMENT_DESC layoutDesc[2] = { 0 };
+
+	layoutDesc[0].SemanticName = "POSITION";
+	layoutDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	layoutDesc[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+	layoutDesc[1].SemanticName = "COLOR";
+	layoutDesc[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	layoutDesc[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	layoutDesc[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+	ui32 elementCount = sizeof(layoutDesc) / sizeof(layoutDesc[0]);
+
+	V_RETURN(dev->CreateInputLayout(layoutDesc, elementCount, vertexShaderFile->Read(), vertexShaderFile->GetSize(), &mlayout));
+	SAFE_DELETE(vertexShaderFile);
+	SAFE_DELETE(pixelShaderFile);
+
 	//Create the RenderTarget view and set it to the output merger stage.
 
 	this->camera = new Camera(static_cast<real>(Window::GetInstance().widthOfWindow), static_cast<real>(Window::GetInstance().heightOfWindow), 0.0f, 10.0f);
@@ -101,7 +126,7 @@ void Renderer::Initialize(std::vector<Gameobject*> gbList, ui32 displayID, ui32 
 		if (gb->hasMesh())
 		{
 			gb->GetMesh()->Initialize(dev);
-			gb->GetMaterial()->Initialize(dev, targetWindow);
+			gb->GetMaterial()->Initialize(dev);
 		}
 	}
 
@@ -127,7 +152,16 @@ void Renderer::Render(void)
 	//Set the color to the backbuffer
 	devcon->ClearRenderTargetView(backbuffer, reinterpret_cast<FLOAT*>(&color));
 
-	//Math::Mat4x4 mvp = this->camera->GetMVP(model->GetTransform())
+	Math::Mat4x4 vp = this->camera->GetVP();
+
+	for (Gameobject* gb : this->gameObjects)
+	{
+		if (gb->hasMesh())
+		{
+			gb->GetMesh()->Render(devcon);
+			gb->GetMaterial()->Render(devcon, gb->GetMesh()->iLength, Math::Mat4x4(vp * gb->GetModelMatrix()));
+		}
+	}
 
 	//Render the image.
 	swapchain->Present(0, 0);
@@ -137,11 +171,17 @@ void Renderer::Render(void)
 void Renderer::CleanUp()
 {
 	//Release all pointers.
+
+	this->gameObjects.clear();
+
 	this->swapchain->Release();
 	this->dev->Release();
 	this->devcon->Release();
 	this->factory->Release();
 	this->backbuffer->Release();
+	this->mvertexShader->Release();
+	this->mpixelShader->Release();
+	this->mlayout->Release();
 }
 
 //Void GetAdapters

@@ -20,6 +20,9 @@ public:
 	void Render(void);
 	void CleanUp(void);
 
+	ID3D11VertexShader* mvertexShader;
+	ID3D11PixelShader* mpixelShader;
+	ID3D11InputLayout* mlayout;
 //Declare private functions and variables.
 private:
 	void GetAdapters();
@@ -31,6 +34,8 @@ private:
 	IDXGIAdapter* adapter;
 	IDXGIFactory* factory;
 	ID3D11RenderTargetView* backbuffer;
+
+
 	Camera* camera;
 
 	std::vector <IDXGIAdapter*> adapters;

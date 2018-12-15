@@ -4,6 +4,40 @@
 #include "rendering/geometry.h"
 #include "typedefs/utils.h"
 
+Geometry::Geometry(Gameobject* gb, fColorRGBA col)
+{
+	this->color = col;
+
+	Vertex* v = new Vertex[4];
+	ui32* i = new ui32[6];
+
+	v[0].position = fColorRGBA{ -1, 1, 0, 1.0f };
+	v[0].color = this->color;
+
+	v[1].position = fColorRGBA{ 1, 1, 0, 1.0f };
+	v[1].color = this->color;
+
+	v[2].position = fColorRGBA{ 1, -1, 0, 1.0f };
+	v[2].color = this->color;
+
+	v[3].position = fColorRGBA{ -1, -1, 0, 1.0f };
+	v[3].color = this->color;
+
+	i[0] = 3;
+	i[1] = 0;
+	i[2] = 1;
+	i[3] = 3;
+	i[4] = 1;
+	i[5] = 2;
+
+	
+	this->vertices = v;
+	this->indicies = i;
+	this->vLength = 4;
+	this->iLength = 6;
+	this->gameobject = gb;
+}
+
 Geometry::Geometry(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, Gameobject* gb)
 {
 	this->vertices = vertices;
@@ -22,16 +56,16 @@ void Geometry::Initialize(ID3D11Device* dev)
 	this->vertexBuffer = 0;
 	this->indexBuffer = 0;
 
-	D3D11_SUBRESOURCE_DATA vertexData;
+	this->vertexData = new D3D11_SUBRESOURCE_DATA;
 	D3D11_SUBRESOURCE_DATA indexData;
 	HRESULT hr;
 
 	//Fill Buffers
 	D3D11_BUFFER_DESC vertexBufferDesc = { 0 };
 	vertexBufferDesc.ByteWidth = sizeof(Vertex) * this->vLength;
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = NULL;
+	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBufferDesc.MiscFlags = NULL;
 	vertexBufferDesc.StructureByteStride = sizeof(Vertex);
 
@@ -43,16 +77,16 @@ void Geometry::Initialize(ID3D11Device* dev)
 	indexBufferDesc.MiscFlags = NULL;
 
 	//Fill Data
-	vertexData.pSysMem = vertices;
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
+	this->vertexData->pSysMem = vertices;
+	this->vertexData->SysMemPitch = 0;
+	this->vertexData->SysMemSlicePitch = 0;
 
 	indexData.pSysMem = indicies;
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
 	//Create Buffer and crash the program if it wasnt succesful.
-	V_RETURN(dev->CreateBuffer(&vertexBufferDesc, &vertexData, &this->vertexBuffer));
+	V_RETURN(dev->CreateBuffer(&vertexBufferDesc, vertexData, &this->vertexBuffer));
 	V_RETURN(dev->CreateBuffer(&indexBufferDesc, &indexData, &this->indexBuffer));
 }
 
@@ -76,8 +110,25 @@ void Geometry::Render(ID3D11DeviceContext* devcon)
 void Geometry::Cleanup(void)
 {
 	//Release pointers.
+	SAFE_DELETE(this->vertices);
+	SAFE_DELETE(this->indicies);
+	SAFE_DELETE(this->gameobject);
+	SAFE_DELETE(this->vertexData);
+
 	vertexBuffer->Release();
 	indexBuffer->Release();
+}
+
+void Geometry::SetColor(fColorRGBA color)
+{
+	this->vertices[0].color = color;
+	this->vertices[1].color = color;
+	this->vertices[2].color = color;
+	this->vertices[3].color = color;
+
+	this->color = color;
+
+	this->vertexData->pSysMem = vertices;
 }
 
 Gameobject* Geometry::GetGameobject(void)

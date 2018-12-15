@@ -11,4 +11,5 @@ class Movement : public Component
 public:
 	virtual void Initialize(char* comName, ComponentType comType) override;
 	virtual void Update(void) override;
+	virtual void Cleanup(void) override;
 };

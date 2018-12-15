@@ -18,7 +18,7 @@ class Gameobject final : public Node
 {
 //Declare public functions. And override some functions of class Node.
 public:
-	Gameobject(const char* vsFilename = "defaultvs.shader", const char* psFilename = "defaultps.shader");
+	Gameobject();
 
 	virtual void Update(void) override;
 	void Cleanup(void);
@@ -26,6 +26,7 @@ public:
 	void AddComponent(Component* component);
 	void DeleteComponent(Component* component);
 
+	void SetMeshData(fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f });
 	void SetMeshData(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength);
 	void SetName(char* gameobjectName);
 

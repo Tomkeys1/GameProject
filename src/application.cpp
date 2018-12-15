@@ -43,31 +43,11 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 	player1->SetName("player1");
 	player2->SetName("player2");
 
-	Vertex* v = new Vertex[4];
-	ui32* i = new ui32[6];
-
-	v[0].position = fColorRGBA{ -1, 1, 0, 1.0f };
-	v[0].color = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f };
-	
-	v[1].position = fColorRGBA{ 1, 1, 0, 1.0f };
-	v[1].color = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f };
-	
-	v[2].position = fColorRGBA{ 1, -1, 0, 1.0f };
-	v[2].color = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f };
-	
-	v[3].position = fColorRGBA{ -1, -1, 0, 1.0f };
-	v[3].color = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f };
-
-	i[0] = 3;
-	i[1] = 0;
-	i[2] = 1;
-	i[3] = 3;
-	i[4] = 1;
-	i[5] = 2;
+	player1->GetTransform().position = { 0, 0, 0 };
 
 
-	player2->SetMeshData(v, i, 4, 6);
-	player1->SetMeshData(v, i, 4, 6);
+	player2->SetMeshData(fColorRGBA{ 0.260f, 0.713f, 0.0f, 1.0f });
+	player1->SetMeshData();
 
 
 	//Create and initialize a new movment component.
@@ -120,5 +100,10 @@ void Application::CleanUp(void)
 Filesystem* Application::GetFilesystem()
 {
 	return this->filesystem;
+}
+
+Renderer * Application::GetRenderer()
+{
+	return this->renderer;
 }
 
