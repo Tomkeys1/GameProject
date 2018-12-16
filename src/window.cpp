@@ -3,6 +3,7 @@
 // INTERNAL INCLUDES
 #include "resource.h"
 #include "rendering/window.h"
+#include "systems/inputhandler.h"
 
 //WndProc
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -10,6 +11,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	//Handle the messages in the window.
 	switch (msg)
 	{
+	case WM_KEYDOWN:
+		Input::GetInstancePtr()->RegisterKey(static_cast<KeyCode>(wParam), 0);
+		return 0;
+	case WM_KEYUP:
+		Input::GetInstancePtr()->RegisterKey(static_cast<KeyCode>(wParam), 1);
+		Input::GetInstancePtr()->EradicateKey(static_cast<KeyCode>(wParam), 1);
+		return 0;
 	//If the message is destroy, destroy the window.
 	case WM_DESTROY:
 		DestroyWindow(hwnd);
@@ -22,7 +30,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		//Go on.
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
-
 	return 0;
 }
 

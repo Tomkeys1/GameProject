@@ -156,7 +156,7 @@ void Renderer::Render(void)
 
 	for (Gameobject* gb : this->gameObjects)
 	{
-		if (gb->hasMesh())
+		if (gb->hasMesh() && gb->isVisisble())
 		{
 			gb->GetMesh()->Render(devcon);
 			gb->GetMaterial()->Render(devcon, gb->GetMesh()->iLength, Math::Mat4x4(vp * gb->GetModelMatrix()));

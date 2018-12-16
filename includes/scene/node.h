@@ -12,6 +12,7 @@ public:
 	Node();
 
 	virtual void Update(void);
+	virtual void Cleanup(void);
 
 	virtual void SetParent(Node* parent);
 	virtual void DeleteParents();

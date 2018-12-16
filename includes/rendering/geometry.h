@@ -34,8 +34,8 @@ private:
 	Gameobject* gameobject;
 
 	Vertex* vertices;
-	ui32* indicies;
 
 	fColorRGBA color;
 
+	ui32* indicies;
 };

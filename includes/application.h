@@ -25,11 +25,14 @@ public:
 	void Initialize(char* title, iVec2 resolution, ui32 displayID = 0);
 	void Update(void);
 	void CleanUp(void);
+
 	Filesystem* GetFilesystem();
 	Renderer* GetRenderer();
 //Declare private variables
 private:
 	Filesystem* filesystem;
 	Renderer* renderer;
+
 	Gameobject* root;
+
 };

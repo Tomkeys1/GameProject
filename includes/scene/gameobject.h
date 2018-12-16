@@ -29,8 +29,10 @@ public:
 	void SetMeshData(fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f });
 	void SetMeshData(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength);
 	void SetName(char* gameobjectName);
+	void SetVisiblity(bool b);
 
 	bool hasMesh(void);
+	bool isVisisble(void);
 
 	Math::Mat4x4 GetModelMatrix(void);
 	Transform& GetTransform(void);
@@ -39,8 +41,6 @@ public:
 
 //Declare private variables.
 private:
-	char* name;
-	bool bMesh;
 
 	Geometry* mesh;
 	Shader* material;
@@ -50,5 +50,7 @@ private:
 
 	std::vector<Component*> components;
 
-
+	char* name;
+	bool bMesh;
+	bool isRendering = true;
 };

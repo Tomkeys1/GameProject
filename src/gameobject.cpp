@@ -53,9 +53,26 @@ void Gameobject::Cleanup(void)
 	//Empty this gameobjects name.
 	this->name = "";
 
-	SAFE_DELETE(this->mesh);
-	SAFE_DELETE(this->material);
-
+	for (Component* component : this->components)
+	{
+		//Check for the component type.
+		//Update the casted components.
+		switch (component->GetType())
+		{
+		case ComponentType::Movement:
+			(static_cast<Movement*>(component))->Cleanup();
+			break;
+		case ComponentType::Shoot:
+			(static_cast<Movement*>(component))->Cleanup();
+			break;
+		case ComponentType::Material:
+			(static_cast<Movement*>(component))->Cleanup();
+			break;
+		case ComponentType::Collision:
+			(static_cast<Movement*>(component))->Cleanup();
+			break;
+		}
+	}
 }
 
 //Void AddComponent
@@ -130,9 +147,21 @@ void Gameobject::SetName(char* gameobjectName)
 	this->name = gameobjectName;
 }
 
+void Gameobject::SetVisiblity(bool b)
+{
+	this->isRendering = b;
+}
+
 bool Gameobject::hasMesh()
 {
 	if (this->bMesh == true)
+		return true;
+	return false;
+}
+
+bool Gameobject::isVisisble(void)
+{
+	if (this->isRendering == true)
 		return true;
 	return false;
 }

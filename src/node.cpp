@@ -118,6 +118,15 @@ void Node::Update(void)
 	}
 }
 
+void Node::Cleanup(void)
+{
+	for (Node* child : this->children)
+	{
+		//Execute its Update function.
+		child->Cleanup();
+	}
+}
+
 //Void += operator
 void Node::operator+=(Node* child)
 {

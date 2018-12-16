@@ -110,11 +110,6 @@ void Geometry::Render(ID3D11DeviceContext* devcon)
 void Geometry::Cleanup(void)
 {
 	//Release pointers.
-	SAFE_DELETE(this->vertices);
-	SAFE_DELETE(this->indicies);
-	SAFE_DELETE(this->gameobject);
-	SAFE_DELETE(this->vertexData);
-
 	vertexBuffer->Release();
 	indexBuffer->Release();
 }

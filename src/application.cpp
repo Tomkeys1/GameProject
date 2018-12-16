@@ -7,6 +7,7 @@
 #include "rendering/renderer.h"
 #include "rendering/shader.h"
 #include "systems/console.h"
+#include "systems/inputhandler.h"
 
 //Declare Application as a Singleton.
 DECLARE_SINGLETON(Application)
@@ -74,13 +75,16 @@ void Application::Update(void)
 		Window::GetInstancePtr()->DispatchMessages();
 
 		//If escape key, close window.
-		if (GetAsyncKeyState(VK_ESCAPE))
+		if (Input::GetInstancePtr()->GetKeyDown(KeyCode::Escape))
 			break;
 
 		// Update Gamestate
 		this->root->Update();
 		// Render Gamestate
 		Application::renderer->Render();
+
+		if (Input::GetInstancePtr()->GetUpState())
+			Input::GetInstancePtr()->EradicateUpKeys();
 
 	} while (true);
 }
@@ -91,6 +95,7 @@ void Application::CleanUp(void)
 	//Release all pointers and safe delete the renderer
 	Application::renderer->CleanUp();
 	Console::GetInstancePtr()->CleanUp();
+	this->root->Cleanup();
 	SAFE_DELETE(this->renderer);
 	Console::GetInstancePtr()->Release();
 	Window::GetInstancePtr()->Release();
