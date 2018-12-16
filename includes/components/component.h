@@ -1,5 +1,8 @@
 
 #pragma once
+//EXTERNAL INCLUDES
+//INTERNAL INCLUDES
+#include "scene/gameobject.h"
 
 enum class ComponentType
 {
@@ -8,6 +11,7 @@ enum class ComponentType
 	Material = 2,
 	Collision = 3
 };
+
 
 class Component 
 {
@@ -21,15 +25,18 @@ public:
 	* @param	comName 
 	* @param	comType 
 	*/
-	virtual void Initialize(char* comName, ComponentType comType);
+	virtual void Initialize(char* comName, ComponentType comType, Gameobject* gb);
 	virtual void Update(void);
 	virtual void Cleanup(void);
 
 	ComponentType GetType(void) const;
+	Gameobject* GetGameObject(void) const;
 
 	bool operator==(const Component& other);
 
 private:
+	Gameobject* gameObject;
 	char* name;
 	ComponentType type;
+
 };

@@ -68,10 +68,13 @@ void Node::MakeRoot(void)
 
 		//Set this nodes parent to null pointer.
 		this->parent = nullptr;
+
+		this->isRoot = true;
 	}
 
-	//Define this node as the root.
 	this->isRoot = true;
+
+	//Define this node as the root.
 }
 
 //Void AddChild
@@ -90,14 +93,22 @@ void Node::AddChild(Node* node)
 	}
 }
 
-void Node::GetAllChildren(Node* root, std::list<Node*>& list)
+void Node::GetAllChildren(std::list<Node*>& list)
 {
-	for (Node* node : root->children)
+	this->ListAllChildren(list);
+}
+
+void Node::ListAllChildren(std::list<Node*>& list)
+{
+	for (Node* node : this->children)
 	{
-		list.push_back(node);
-		if(node->hasChildren() == true)
-			GetAllChildren(node, list);
+		//Recursive function to open all children in all childs of this node.
+		node->ListAllChildren(list);
 	}
+
+	if(this->parent)
+		list.push_back(this);
+
 }
 
 bool Node::hasChildren()
@@ -107,14 +118,29 @@ bool Node::hasChildren()
 	return false;
 }
 
+Node* Node::GetParent()
+{
+	return this->parent;
+}
+
 //Void Update
 void Node::Update(void)
 {
+
 	//For every child in this nodes children list
 	for (Node* child : this->children) 
 	{
 		//Execute its Update function.
 		child->Update();
+	}
+
+	if (this->deletedObjects.size() != 0)
+	{
+		for (Node* node : this->deletedObjects)
+		{
+			this->children.remove(node);
+		}
+		this->deletedObjects.clear();
 	}
 }
 
@@ -125,6 +151,15 @@ void Node::Cleanup(void)
 		//Execute its Update function.
 		child->Cleanup();
 	}
+
+	if (this->parent)
+	{
+		//Remove this node from its parent children list.
+		this->parent->deletedObjects.push_back(this);
+	}
+
+	this->children.clear();
+	delete this;
 }
 
 //Void += operator

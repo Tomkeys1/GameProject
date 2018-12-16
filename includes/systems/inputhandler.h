@@ -18,6 +18,7 @@ public:
 	bool GetKeyDown(KeyCode key);
 	bool GetKeyUp(KeyCode key);
 	bool GetKeyHold(KeyCode key);
+	bool GetKey(KeyCode key);
 	bool GetUpState(void);
 
 private:

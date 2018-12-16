@@ -21,9 +21,12 @@ public:
 	virtual void MakeRoot(void);
 
 	virtual void AddChild(Node* node);
-	virtual void GetAllChildren(Node* root, std::list<Node*>& list);
+	virtual void GetAllChildren(std::list<Node*>& list);
+	virtual void ListAllChildren(std::list<Node*>& list);
 
 	virtual bool hasChildren();
+
+	virtual Node* GetParent();
 
 	virtual void operator+=(Node* child);
 	virtual void operator-=(Node* child);
@@ -35,4 +38,5 @@ private:
 
 	Node* parent;
 	std::list<Node*> children;
+	std::list<Node*> deletedObjects;
 };

@@ -9,7 +9,7 @@ class Movement : public Component
 {
 //Declare the public functions that are overwritten.
 public:
-	virtual void Initialize(char* comName, ComponentType comType) override;
+	virtual void Initialize(char* comName, ComponentType comType, Gameobject* gb) override;
 	virtual void Update(void) override;
 	virtual void Cleanup(void) override;
 };

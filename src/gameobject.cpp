@@ -10,12 +10,17 @@
 Gameobject::Gameobject()
 {
 	//Set this gameobjects position, scaling and rotation to 0;
-	this->transform.position = { 0.5f, 0, 0 };
+	this->transform.position = { 0.0f, 0, 0 };
 	this->transform.scaling = { 100, 100, 100 };
 	this->transform.rotation = { 1, 0, 0, 0 };
 
 	this->material = new Shader();
 	this->bMesh = false;
+}
+
+Gameobject::~Gameobject()
+{
+	this->Cleanup();
 }
 
 //Void Update
@@ -50,6 +55,7 @@ void Gameobject::Update(void)
 //Void Cleanup
 void Gameobject::Cleanup(void)
 {
+
 	//Empty this gameobjects name.
 	this->name = "";
 
@@ -72,7 +78,12 @@ void Gameobject::Cleanup(void)
 			(static_cast<Movement*>(component))->Cleanup();
 			break;
 		}
+
+		delete component;
 	}
+	this->components.clear();
+
+	Node::Cleanup();
 }
 
 //Void AddComponent

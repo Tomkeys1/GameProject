@@ -19,6 +19,7 @@ class Gameobject final : public Node
 //Declare public functions. And override some functions of class Node.
 public:
 	Gameobject();
+	~Gameobject();
 
 	virtual void Update(void) override;
 	void Cleanup(void);

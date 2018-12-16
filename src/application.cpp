@@ -21,6 +21,7 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 	//Create the scenegraph root.
 	this->root = new Gameobject;
 	this->root->SetName("root");
+	this->root->MakeRoot();
 
 	//Create gameobjects.
 	Gameobject* player1 = new Gameobject;
@@ -28,16 +29,13 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 
 	//Add childs.
 	this->root->AddChild(player1);
-	this->root->AddChild(player2);
-
-	std::list<Node*> test;
-	std::vector<Gameobject*> gameObjects;
+	player1->AddChild(player2);
 	
-	this->root->GetAllChildren(this->root, test);
+	this->root->GetAllChildren(this->nodes);
 
-	for (Node* node : test)
+	for (Node* node : this->nodes)
 	{
-		gameObjects.push_back(reinterpret_cast<Gameobject*>(node));
+		this->gameObjects.push_back(reinterpret_cast<Gameobject*>(node));
 	}
 
 	//Set gameobjects names.
@@ -47,13 +45,13 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 	player1->GetTransform().position = { 0, 0, 0 };
 
 
-	player2->SetMeshData(fColorRGBA{ 0.260f, 0.713f, 0.0f, 1.0f });
 	player1->SetMeshData();
+	player2->SetMeshData(fColorRGBA{ 0.260f, 0.713f, 0.0f, 1.0f });
 
 
 	//Create and initialize a new movment component.
 	Movement* mov = new Movement;
-	mov->Initialize("movement", ComponentType::Movement);
+	mov->Initialize("movement", ComponentType::Movement, player1);
 
 	//Add player1 the movement component.
 	player1->AddComponent(mov);
@@ -61,8 +59,7 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 	//Create and initialize the renderer.
 	Application::renderer = new Renderer;
 	Application::filesystem = new Filesystem;
-	Application::renderer->Initialize(gameObjects, displayID);
-
+	Application::renderer->Initialize(this->gameObjects, displayID);
 }
 
 //Void Update
@@ -80,6 +77,7 @@ void Application::Update(void)
 
 		// Update Gamestate
 		this->root->Update();
+
 		// Render Gamestate
 		Application::renderer->Render();
 
@@ -93,11 +91,14 @@ void Application::Update(void)
 void Application::CleanUp(void)
 {
 	//Release all pointers and safe delete the renderer
-	Application::renderer->CleanUp();
 	Console::GetInstancePtr()->CleanUp();
-	this->root->Cleanup();
+	this->nodes.clear();
+	this->gameObjects.clear();
+	Application::renderer->CleanUp();
 	SAFE_DELETE(this->renderer);
+	this->root->Cleanup();
 	Console::GetInstancePtr()->Release();
+	Input::GetInstancePtr()->Release();
 	Window::GetInstancePtr()->Release();
 	Application::GetInstancePtr()->Release();
 }
@@ -107,7 +108,7 @@ Filesystem* Application::GetFilesystem()
 	return this->filesystem;
 }
 
-Renderer * Application::GetRenderer()
+Renderer* Application::GetRenderer()
 {
 	return this->renderer;
 }

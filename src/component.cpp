@@ -5,11 +5,12 @@
 #include "typedefs/utils.h"
 
 //Void Initialize
-void Component::Initialize(char* comName, ComponentType comType)
+void Component::Initialize(char* comName, ComponentType comType, Gameobject* gb)
 {
 	//Set name and type.
 	this->name = comName;
 	this->type = comType;
+	this->gameObject = gb;
 }
 
 //Void Update
@@ -21,7 +22,7 @@ void Component::Update(void)
 //Void Update
 void Component::Cleanup(void)
 {
-
+	this->name = "";
 }
 
 //GetType.
@@ -29,6 +30,11 @@ ComponentType Component::GetType(void) const
 {
 	//Returns this components component type.
 	return this->type;
+}
+
+Gameobject* Component::GetGameObject(void) const
+{
+	return this->gameObject;
 }
 
 //Compare two Components.

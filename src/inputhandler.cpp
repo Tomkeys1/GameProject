@@ -66,6 +66,13 @@ bool Input::GetKeyHold(KeyCode key)
 	return false;
 }
 
+bool Input::GetKey(KeyCode key)
+{
+	if (this->downKeys[key] == key || this->holdKeys[key] == key)
+		return true;
+	return false;
+}
+
 bool Input::GetUpState(void)
 {
 	if (this->upState)

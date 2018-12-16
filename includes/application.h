@@ -1,6 +1,8 @@
 
 #pragma once
 // EXTERNAL INCLUDES
+#include <vector>
+#include <list>
 // INTERNAL INCLUDES
 #include "typedefs/types.h"
 #include "typedefs/utils.h"
@@ -12,6 +14,7 @@
 class Window;
 class Renderer;
 class Gameobject;
+class Node;
 class Camera;
 
 //Class Application
@@ -34,5 +37,8 @@ private:
 	Renderer* renderer;
 
 	Gameobject* root;
+
+	std::list<Node*> nodes;
+	std::vector<Gameobject*> gameObjects;
 
 };
