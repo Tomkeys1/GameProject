@@ -11,9 +11,8 @@
 
 
 //Void Initialize
-void Renderer::Initialize(std::vector<Gameobject*> gbList, ui32 displayID, ui32 adapterID, HWND targetWindow)
+void Renderer::Initialize(ui32 displayID, ui32 adapterID, HWND targetWindow)
 {
-	this->gameObjects = gbList;
 
 	//Get the Adapters.
 	GetAdapters();
@@ -121,16 +120,6 @@ void Renderer::Initialize(std::vector<Gameobject*> gbList, ui32 displayID, ui32 
 
 	this->camera = new Camera(static_cast<real>(Window::GetInstance().widthOfWindow), static_cast<real>(Window::GetInstance().heightOfWindow), 0.0f, 10.0f);
 
-	for (Gameobject* gb : this->gameObjects)
-	{
-		if (gb->hasMesh())
-		{
-			gb->GetMesh()->Initialize(dev);
-			gb->GetMaterial()->Initialize(dev);
-		}
-	}
-
-
 	dev->CreateRenderTargetView(pBackBuffer, NULL, &backbuffer);
 	devcon->OMSetRenderTargets(1, &backbuffer, NULL);
 
@@ -173,7 +162,6 @@ void Renderer::CleanUp()
 	//Release all pointers.
 
 	this->gameObjects.clear();
-
 	this->swapchain->Release();
 	this->dev->Release();
 	this->devcon->Release();
@@ -182,6 +170,13 @@ void Renderer::CleanUp()
 	this->mvertexShader->Release();
 	this->mpixelShader->Release();
 	this->mlayout->Release();
+}
+
+void Renderer::InitializeGameobject(Gameobject* gb)
+{
+	gb->GetMesh()->Initialize(dev);
+	gb->GetMaterial()->Initialize(dev);
+	this->gameObjects.push_back(gb);
 }
 
 //Void GetAdapters

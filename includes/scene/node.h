@@ -27,6 +27,8 @@ public:
 	virtual bool hasChildren();
 
 	virtual Node* GetParent();
+	virtual Node* GetRoot();
+	virtual void ListRoot(Node& node);
 
 	virtual void operator+=(Node* child);
 	virtual void operator-=(Node* child);

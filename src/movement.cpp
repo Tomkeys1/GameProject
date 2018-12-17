@@ -25,9 +25,19 @@ void Movement::Update(void)
 	{
 		this->GetGameObject()->GetTransform().position.x += 0.0001f;
 	}
-	else if (Input::GetInstancePtr()->GetKeyDown(KeyCode::S))
+
+	if (Input::GetInstancePtr()->GetKey(KeyCode::S))
 	{
-		this->GetGameObject()->Cleanup();
+		this->GetGameObject()->GetTransform().position.y -= 0.0001f;
+	}
+	else if (Input::GetInstancePtr()->GetKey(KeyCode::W))
+	{
+		this->GetGameObject()->GetTransform().position.y += 0.0001f;
+	}
+
+	if (Input::GetInstancePtr()->GetKeyUp(KeyCode::V))
+	{
+		this->GetGameObject()->SetVisiblity(!this->GetGameObject()->isVisisble());
 	}
 }
 

@@ -28,9 +28,11 @@ public:
 	void Initialize(char* title, iVec2 resolution, ui32 displayID = 0);
 	void Update(void);
 	void CleanUp(void);
+	void AddGameobject(Gameobject* gb);
 
 	Filesystem* GetFilesystem();
 	Renderer* GetRenderer();
+	Gameobject* GetRoot();
 //Declare private variables
 private:
 	Filesystem* filesystem;
@@ -38,7 +40,5 @@ private:
 
 	Gameobject* root;
 
-	std::list<Node*> nodes;
 	std::vector<Gameobject*> gameObjects;
-
 };

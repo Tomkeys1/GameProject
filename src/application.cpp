@@ -4,6 +4,7 @@
 #include "application.h"
 #include "scene/gameobject.h"
 #include "components/movement.h"
+#include "components/shooting.h"
 #include "rendering/renderer.h"
 #include "rendering/shader.h"
 #include "systems/console.h"
@@ -15,54 +16,45 @@ DECLARE_SINGLETON(Application)
 //Void Initialize
 void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 {
-	//Instantiate the window.
-	Window::GetInstance().Instantiate(title, resolution.x, resolution.y, displayID);
-
-	//Create the scenegraph root.
-	this->root = new Gameobject;
+	this->root = new Gameobject(false, true);
 	this->root->SetName("root");
 	this->root->MakeRoot();
+	//Instantiate the window.
+	Window::GetInstance().Instantiate(title, resolution.x, resolution.y, displayID);
+	Application::renderer = new Renderer;
+	Application::filesystem = new Filesystem;
+	Application::renderer->Initialize(displayID);
+
+	//Create the scenegraph root.
 
 	//Create gameobjects.
 	Gameobject* player1 = new Gameobject;
-	Gameobject* player2 = new Gameobject;
+	Gameobject* player2 = new Gameobject(true, false, false, fColorRGBA{ 0.125f, 0.788f, 0.972f, 1.0f});
+
 
 	//Add childs.
-	this->root->AddChild(player1);
-	player1->AddChild(player2);
-	
-	this->root->GetAllChildren(this->nodes);
-
-	for (Node* node : this->nodes)
-	{
-		this->gameObjects.push_back(reinterpret_cast<Gameobject*>(node));
-	}
-
 	//Set gameobjects names.
 	player1->SetName("player1");
 	player2->SetName("player2");
 
-	player1->GetTransform().position = { 0, 0, 0 };
-
-
-	player1->SetMeshData();
-	player2->SetMeshData(fColorRGBA{ 0.260f, 0.713f, 0.0f, 1.0f });
-
+	player1->GetTransform().position = { 0, -0.7f, 0 };
+	player2->GetTransform().scaling = { 100, 100, 100 };
 
 	//Create and initialize a new movment component.
 	Movement* mov = new Movement;
+	Shooting* shot = new Shooting;
+
+	shot->Initialize("shooting", ComponentType::Shoot, player1);
 	mov->Initialize("movement", ComponentType::Movement, player1);
 
 	//Add player1 the movement component.
 	player1->AddComponent(mov);
+	player1->AddComponent(shot);
 
 	//Create and initialize the renderer.
-	Application::renderer = new Renderer;
-	Application::filesystem = new Filesystem;
-	Application::renderer->Initialize(this->gameObjects, displayID);
 }
 
-//Void Update
+//Void Updatea
 void Application::Update(void)
 {
 	//Do loop.
@@ -92,7 +84,6 @@ void Application::CleanUp(void)
 {
 	//Release all pointers and safe delete the renderer
 	Console::GetInstancePtr()->CleanUp();
-	this->nodes.clear();
 	this->gameObjects.clear();
 	Application::renderer->CleanUp();
 	SAFE_DELETE(this->renderer);
@@ -103,6 +94,11 @@ void Application::CleanUp(void)
 	Application::GetInstancePtr()->Release();
 }
 
+void Application::AddGameobject(Gameobject* gb)
+{
+	this->gameObjects.push_back(gb);
+}
+
 Filesystem* Application::GetFilesystem()
 {
 	return this->filesystem;
@@ -111,5 +107,10 @@ Filesystem* Application::GetFilesystem()
 Renderer* Application::GetRenderer()
 {
 	return this->renderer;
+}
+
+Gameobject* Application::GetRoot()
+{
+	return this->root;
 }
 

@@ -4,7 +4,7 @@
 
 Camera::Camera(real width, real height, real nearC, real farC)
 {
-	this->gameobject = new Gameobject;
+	this->gameobject = new Gameobject(false, false, true);
 
 	this->width = width;
 	this->height = height;

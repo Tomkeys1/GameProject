@@ -18,7 +18,20 @@ class Gameobject final : public Node
 {
 //Declare public functions. And override some functions of class Node.
 public:
-	Gameobject();
+	Gameobject
+	(
+		bool render = true, bool isRoot = false, bool cam = false,
+		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f },
+		Gameobject* parent = nullptr
+	);
+
+	Gameobject
+	(
+		Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, 
+		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f }, 
+		bool render = true, bool isRoot = false
+	);
+
 	~Gameobject();
 
 	virtual void Update(void) override;
@@ -31,6 +44,7 @@ public:
 	void SetMeshData(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength);
 	void SetName(char* gameobjectName);
 	void SetVisiblity(bool b);
+	void SetVisi(bool b);
 
 	bool hasMesh(void);
 	bool isVisisble(void);

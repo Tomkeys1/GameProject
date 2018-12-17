@@ -8,7 +8,7 @@ enum class ComponentType
 {
 	Movement = 0,
 	Shoot = 1,
-	Material = 2,
+	Bullet = 2,
 	Collision = 3
 };
 

@@ -14,13 +14,6 @@ Node::Node() :
 //Void SetParent
 void Node::SetParent(Node* parent)
 {
-	//if this node is the root.
-	if (isRoot)
-	{
-		LOG("It is forbidden to give root a parent");
-		return;
-	}
-
 	//Set this node to the parent of the inputed node.
 	this->parent = parent;
 }
@@ -111,6 +104,20 @@ void Node::ListAllChildren(std::list<Node*>& list)
 
 }
 
+void Node::ListRoot(Node& node)
+{
+	if (this->parent->isRoot)
+	{
+		node = *this->parent;
+	}
+
+	if (this->parent)
+	{
+		this->parent->ListRoot(node);
+	}
+	
+}
+
 bool Node::hasChildren()
 {
 	if (this->children.size() != 0)
@@ -121,6 +128,14 @@ bool Node::hasChildren()
 Node* Node::GetParent()
 {
 	return this->parent;
+}
+
+Node* Node::GetRoot()
+{
+	Node* temp = this;
+
+	this->ListRoot(*temp);
+	return temp;
 }
 
 //Void Update

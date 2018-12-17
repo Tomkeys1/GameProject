@@ -16,9 +16,10 @@ class Renderer
 {
 //Declare public functions.
 public: 
-	void Initialize(std::vector<Gameobject*> gbList, ui32 displayID = 0, ui32 adapterID = 0, HWND targetWindow = Window::GetInstance().handle);
+	void Initialize(ui32 displayID = 0, ui32 adapterID = 0, HWND targetWindow = Window::GetInstance().handle);
 	void Render(void);
 	void CleanUp(void);
+	void InitializeGameobject(Gameobject* gb);
 
 	ID3D11VertexShader* mvertexShader;
 	ID3D11PixelShader* mpixelShader;
@@ -34,7 +35,6 @@ private:
 	IDXGIAdapter* adapter;
 	IDXGIFactory* factory;
 	ID3D11RenderTargetView* backbuffer;
-
 
 	Camera* camera;
 
