@@ -3,12 +3,11 @@
 // INTERNAL INCLUDES
 #include "application.h"
 #include "scene/gameobject.h"
-#include "components/movement.h"
-#include "components/shooting.h"
 #include "rendering/renderer.h"
 #include "rendering/shader.h"
 #include "systems/console.h"
 #include "systems/inputhandler.h"
+#include "scene/scene.h"
 
 //Declare Application as a Singleton.
 DECLARE_SINGLETON(Application)
@@ -16,9 +15,8 @@ DECLARE_SINGLETON(Application)
 //Void Initialize
 void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 {
-	this->root = new Gameobject(false, true);
-	this->root->SetName("root");
-	this->root->MakeRoot();
+	this->scene = new Scene;
+
 	//Instantiate the window.
 	Window::GetInstance().Instantiate(title, resolution.x, resolution.y, displayID);
 	Application::renderer = new Renderer;
@@ -26,30 +24,7 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 	Application::renderer->Initialize(displayID);
 
 	//Create the scenegraph root.
-
-	//Create gameobjects.
-	Gameobject* player1 = new Gameobject;
-	Gameobject* player2 = new Gameobject(true, false, false, fColorRGBA{ 0.125f, 0.788f, 0.972f, 1.0f});
-
-
-	//Add childs.
-	//Set gameobjects names.
-	player1->SetName("player1");
-	player2->SetName("player2");
-
-	player1->GetTransform().position = { 0, -0.7f, 0 };
-	player2->GetTransform().scaling = { 100, 100, 100 };
-
-	//Create and initialize a new movment component.
-	Movement* mov = new Movement;
-	Shooting* shot = new Shooting;
-
-	shot->Initialize("shooting", ComponentType::Shoot, player1);
-	mov->Initialize("movement", ComponentType::Movement, player1);
-
-	//Add player1 the movement component.
-	player1->AddComponent(mov);
-	player1->AddComponent(shot);
+	this->scene->Initialize();
 
 	//Create and initialize the renderer.
 }
@@ -68,7 +43,7 @@ void Application::Update(void)
 			break;
 
 		// Update Gamestate
-		this->root->Update();
+		this->scene->Update();
 
 		// Render Gamestate
 		Application::renderer->Render();
@@ -84,10 +59,9 @@ void Application::CleanUp(void)
 {
 	//Release all pointers and safe delete the renderer
 	Console::GetInstancePtr()->CleanUp();
-	this->gameObjects.clear();
 	Application::renderer->CleanUp();
 	SAFE_DELETE(this->renderer);
-	this->root->Cleanup();
+	this->scene->Cleanup();
 	Console::GetInstancePtr()->Release();
 	Input::GetInstancePtr()->Release();
 	Window::GetInstancePtr()->Release();
@@ -107,6 +81,11 @@ Filesystem* Application::GetFilesystem()
 Renderer* Application::GetRenderer()
 {
 	return this->renderer;
+}
+
+Scene* Application::GetScene()
+{
+	return this->scene;
 }
 
 Gameobject* Application::GetRoot()

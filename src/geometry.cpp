@@ -13,7 +13,7 @@ Geometry::Geometry(Gameobject* gb, fColorRGBA col)
 
 	v[0].position = fColorRGBA{ -1, 1, 0, 1.0f };
 	v[0].color = this->color;
-
+	
 	v[1].position = fColorRGBA{ 1, 1, 0, 1.0f };
 	v[1].color = this->color;
 

@@ -15,6 +15,7 @@ class Window;
 class Renderer;
 class Gameobject;
 class Node;
+class Scene;
 class Camera;
 
 //Class Application
@@ -32,9 +33,11 @@ public:
 
 	Filesystem* GetFilesystem();
 	Renderer* GetRenderer();
+	Scene* GetScene();
 	Gameobject* GetRoot();
 //Declare private variables
 private:
+	Scene* scene;
 	Filesystem* filesystem;
 	Renderer* renderer;
 

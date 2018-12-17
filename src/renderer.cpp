@@ -7,7 +7,9 @@
 #include "rendering/camera.h"
 #include "typedefs/transform.h"
 #include "scene/gameobject.h"
+#include "scene/scene.h"
 #include "application.h"
+#include "typedefs/color.h"
 
 
 //Void Initialize
@@ -131,15 +133,8 @@ void Renderer::Initialize(ui32 displayID, ui32 adapterID, HWND targetWindow)
 void Renderer::Render(void)
 {
 	//Set backround color.
-	fColorRGBA color = 
-	{
-		1.0f,
-		1.0f,
-		1.0f, 
-		1.0f 
-	};
 	//Set the color to the backbuffer
-	devcon->ClearRenderTargetView(backbuffer, reinterpret_cast<FLOAT*>(&color));
+	devcon->ClearRenderTargetView(backbuffer, reinterpret_cast<FLOAT*>(&Color::GetColor(ColorCode::WHITE)));
 
 	Math::Mat4x4 vp = this->camera->GetVP();
 
@@ -149,7 +144,18 @@ void Renderer::Render(void)
 		{
 			gb->GetMesh()->Render(devcon);
 			gb->GetMaterial()->Render(devcon, gb->GetMesh()->iLength, Math::Mat4x4(vp * gb->GetModelMatrix()));
+
+			for (Node* child : gb->GetAllChildren())
+			{
+				Gameobject* childGb = reinterpret_cast<Gameobject*>(child);
+				if (childGb->hasMesh() && childGb->isVisisble())
+				{
+					childGb->GetMesh()->Render(devcon);
+					childGb->GetMaterial()->Render(devcon, childGb->GetMesh()->iLength, Math::Mat4x4(vp * childGb->GetModelMatrix()));
+				}
+			}
 		}
+
 	}
 
 	//Render the image.
@@ -176,7 +182,9 @@ void Renderer::InitializeGameobject(Gameobject* gb)
 {
 	gb->GetMesh()->Initialize(dev);
 	gb->GetMaterial()->Initialize(dev);
-	this->gameObjects.push_back(gb);
+
+	if(gb->GetParent()->hasRoot())
+		this->gameObjects.push_back(gb);
 }
 
 //Void GetAdapters

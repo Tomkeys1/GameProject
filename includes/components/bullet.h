@@ -8,7 +8,9 @@ class Bullet : public Component
 {
 	//Declare the public functions that are overwritten.
 public:
-	virtual void Initialize(char* comName, ComponentType comType, Gameobject* gb) override;
+	Bullet();
+
+	void Initialize(Gameobject* gb);
 	virtual void Update(void) override;
 	virtual void Cleanup(void) override;
 	void SetBulletValues(real speed, real time);

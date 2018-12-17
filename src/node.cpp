@@ -86,9 +86,11 @@ void Node::AddChild(Node* node)
 	}
 }
 
-void Node::GetAllChildren(std::list<Node*>& list)
+std::list<Node*> Node::GetAllChildren()
 {
-	this->ListAllChildren(list);
+	std::list<Node*> temp;
+	this->ListAllChildren(temp);
+	return temp;
 }
 
 void Node::ListAllChildren(std::list<Node*>& list)
@@ -123,6 +125,11 @@ bool Node::hasChildren()
 	if (this->children.size() != 0)
 		return true;
 	return false;
+}
+
+bool Node::hasRoot()
+{
+	return this->isRoot;
 }
 
 Node* Node::GetParent()

@@ -4,11 +4,16 @@
 #include "typedefs/utils.h"
 #include "scene/gameobject.h"
 
-void Bullet::Initialize(char* comName, ComponentType comType, Gameobject* gb)
+Bullet::Bullet()
+{
+	Component::Initialize("bullet", ComponentType::Bullet);
+}
+
+//Void Initialize
+void Bullet::Initialize(Gameobject* gb)
 {
 	//Initialize the base.
-	Component::Initialize(comName, comType, gb);
-	
+	Component::SetGameObject(gb);
 }
 
 void Bullet::Update(void)
@@ -19,10 +24,12 @@ void Bullet::Update(void)
 	if (this->time > 0.0f)
 	{
 		this->GetGameObject()->GetTransform().position.y += speed;
-		this->time -= 0.00008f;
+		this->time -= 0.0008f;
 	}
 	else
+	{
 		this->GetGameObject()->Cleanup();
+	}
 }
 
 void Bullet::Cleanup(void)

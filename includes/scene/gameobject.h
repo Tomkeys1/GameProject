@@ -21,15 +21,16 @@ public:
 	Gameobject
 	(
 		bool render = true, bool isRoot = false, bool cam = false,
-		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f },
-		Gameobject* parent = nullptr
+		Gameobject* parent = nullptr,
+		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f }
 	);
 
 	Gameobject
 	(
 		Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, 
 		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f }, 
-		bool render = true, bool isRoot = false
+		bool render = true, bool isRoot = false,
+		Gameobject* parent = nullptr
 	);
 
 	~Gameobject();
@@ -40,15 +41,15 @@ public:
 	void AddComponent(Component* component);
 	void DeleteComponent(Component* component);
 
-	void SetMeshData(fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f });
 	void SetMeshData(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength);
-	void SetName(char* gameobjectName);
+	void SetName(const char* gameobjectName);
 	void SetVisiblity(bool b);
 	void SetVisi(bool b);
 
 	bool hasMesh(void);
 	bool isVisisble(void);
 
+	const char* GetName(void);
 	Math::Mat4x4 GetModelMatrix(void);
 	Transform& GetTransform(void);
 	Geometry* GetMesh(void);
@@ -65,7 +66,7 @@ private:
 
 	std::vector<Component*> components;
 
-	char* name;
+	const char* name;
 	bool bMesh;
 	bool isRendering = true;
 };

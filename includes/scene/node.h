@@ -21,10 +21,11 @@ public:
 	virtual void MakeRoot(void);
 
 	virtual void AddChild(Node* node);
-	virtual void GetAllChildren(std::list<Node*>& list);
+	virtual std::list<Node*> GetAllChildren();
 	virtual void ListAllChildren(std::list<Node*>& list);
 
 	virtual bool hasChildren();
+	virtual bool hasRoot();
 
 	virtual Node* GetParent();
 	virtual Node* GetRoot();

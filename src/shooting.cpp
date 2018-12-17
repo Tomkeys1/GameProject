@@ -1,19 +1,27 @@
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
 #include "systems/inputhandler.h"
+#include "typedefs/color.h"
 #include "components/shooting.h"
 #include "components/bullet.h"
 #include "typedefs/utils.h"
 #include "scene/gameobject.h"
+#include "application.h"
+#include "scene/scene.h"
 
-void Shooting::Initialize(char* comName, ComponentType comType, Gameobject* gb)
+Shooting::Shooting()
+{
+	Component::Initialize("shooting", ComponentType::Shoot);
+	this->growth = 0.00000006f;
+	this->time = 2.0f;
+	this->speed = 0.0004f;
+}
+
+//Void Initialize
+void Shooting::Initialize(Gameobject* gb)
 {
 	//Initialize the base.
-	Component::Initialize(comName, comType, gb);
-
-	this->growth = 0.00000001f;
-	this->time = 2.0f;
-	this->speed = 0.00004f;
+	Component::SetGameObject(gb);
 
 }
 
@@ -24,20 +32,25 @@ void Shooting::Update(void)
 
 	if (Input::GetInstancePtr()->GetKey(KeyCode::Space))
 	{
-		this->speed += this->growth;
+		if (this->GetGameObject()->isVisisble())
+		{
+			this->speed += this->growth;
+		}
 	}
 
 	if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Space))
 	{
-		Gameobject* shot = new Gameobject(true, false, false, fColorRGBA{ 0.972f, 0.125f, 0.125f, 1.0f }, this->GetGameObject());
-		shot->GetTransform().scaling = {5, 15, 0};
-		shot->GetTransform().position = this->GetGameObject()->GetTransform().position + Math::Vec3{0, 0.25f, 0};
-		Bullet* bullet = new Bullet;
-		bullet->Initialize("bullet", ComponentType::Bullet, shot);
-		shot->AddComponent(bullet);
-		bullet->SetBulletValues(this->speed, this->time);
-		shot->SetName("Shot1");
-		this->speed = 0.00004f;
+		if (this->GetGameObject()->isVisisble())
+		{
+			Application::GetInstancePtr()->GetScene()->AddGameobject("shot", CreateMode::NORMAL, this->GetGameObject(), Color::GetColor(ColorCode::RED));
+			Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetGameobject("shot");
+			temp->GetTransform().scaling = { 5, 15, 0 };
+			temp->GetTransform().position = this->GetGameObject()->GetTransform().position + Math::Vec3{ 0, 0.25f, 0 };
+			Bullet* bullet = new Bullet;
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, bullet);
+			bullet->SetBulletValues(this->speed, this->time);
+			this->speed = 0.0004f;
+		}
 	}
 }
 

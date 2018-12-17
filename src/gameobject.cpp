@@ -1,8 +1,6 @@
 
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
-#include "application.h"
-#include "rendering/renderer.h"
 #include "scene/gameobject.h"
 #include "components/movement.h"
 #include "components/shooting.h"
@@ -11,42 +9,35 @@
 #include "rendering/shader.h"
 
 //Gameobject Constructor.
-Gameobject::Gameobject(bool render, bool isRoot, bool cam, fColorRGBA col, Gameobject* parent)
+Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, fColorRGBA col)
 {
 	//Set this gameobjects position, scaling and rotation to 0;
-	this->transform.position = { 0.0f, 0, 0 };
-	this->transform.scaling = { 30, 60, 0 };
+	this->transform.position = { 0, 0, 0 };
+	this->transform.scaling = { 100, 100, 0 };
 	this->transform.rotation = { 1, 0, 0, 0 };
 
 	if (cam)
 		return;
 
-	Application::GetInstancePtr()->AddGameobject(this);
 	if (render)
 	{
 		this->material = new Shader();
 		this->mesh = new Geometry(this, col);
 		this->bMesh = true;
-		Application::GetInstancePtr()->GetRenderer()->InitializeGameobject(this);
 	}
 	else
 	{
 		this->bMesh = false;
 	}
 
-	if (!isRoot && parent == nullptr)
-	{
-		this->SetParent(Application::GetInstancePtr()->GetRoot());
-		Application::GetInstancePtr()->GetRoot()->AddChild(this);
-	}
-	else if (parent != nullptr)
+	if (parent != nullptr)
 	{
 		this->SetParent(parent);
 		parent->AddChild(this);
 	}
 }
 
-Gameobject::Gameobject(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, fColorRGBA col, bool render, bool isRoot)
+Gameobject::Gameobject(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, fColorRGBA col, bool render, bool isRoot, Gameobject* parent)
 {
 
 }
@@ -63,20 +54,20 @@ void Gameobject::Update(void)
 	Node::Update();
 
 	//For all component pointers in the components list of this gameobject.
-	for (Component* component : this->components) 
+	for (Component* component : this->components)  
 	{
 		//Check for the component type.
 		//Update the casted components.
 		switch (component->GetType()) 
 		{
 			case ComponentType::Movement :
-				(static_cast<Movement*>(component))->Update();
+				(reinterpret_cast<Movement*>(component))->Update();
 				break;
 			case ComponentType::Shoot:
-				(static_cast<Shooting*>(component))->Update();
+				(reinterpret_cast<Shooting*>(component))->Update();
 				break;
 			case ComponentType::Bullet:
-				(static_cast<Bullet*>(component))->Update();
+				(reinterpret_cast<Bullet*>(component))->Update();
 				break;
 		}
 	}
@@ -96,21 +87,21 @@ void Gameobject::Cleanup(void)
 		switch (component->GetType())
 		{
 		case ComponentType::Movement:
-			(static_cast<Movement*>(component))->Cleanup();
+			(reinterpret_cast<Movement*>(component))->Cleanup();
 			break;
 		case ComponentType::Shoot:
-			(static_cast<Shooting*>(component))->Cleanup();
+			(reinterpret_cast<Shooting*>(component))->Cleanup();
 			break;
 		case ComponentType::Bullet:
-			(static_cast<Bullet*>(component))->Cleanup();
+			(reinterpret_cast<Bullet*>(component))->Cleanup();
 			break;
 		}
 
 		delete component;
 	}
 	this->components.clear();
-
 	Node::Cleanup();
+
 }
 
 //Void AddComponent
@@ -146,10 +137,9 @@ void Gameobject::SetMeshData(Vertex* vertices, ui32* indicies, ui32 vLength, ui3
 	this->bMesh = true;
 }
 
-void Gameobject::SetMeshData(fColorRGBA col)
+const char* Gameobject::GetName(void)
 {
-	this->mesh = new Geometry(this, col);
-	this->bMesh = true;
+	return this->name;
 }
 
 Math::Mat4x4 Gameobject::GetModelMatrix(void)
@@ -180,7 +170,7 @@ Shader* Gameobject::GetMaterial(void)
 }
 
 //Set name
-void Gameobject::SetName(char* gameobjectName)
+void Gameobject::SetName(const char* gameobjectName)
 {
 	//Set this gameobjects name.
 	this->name = gameobjectName;
@@ -190,10 +180,7 @@ void Gameobject::SetVisiblity(bool b)
 {
 	this->isRendering = b;
 
-	std::list<Node*> temp; 
-	this->GetAllChildren(temp);
-
-	for (Node* child : temp)
+	for (Node* child : this->GetAllChildren())
 	{
 		reinterpret_cast<Gameobject*>(child)->SetVisi(b);
 	}

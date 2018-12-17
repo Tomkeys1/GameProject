@@ -5,11 +5,16 @@
 #include "components/movement.h"
 #include "typedefs/utils.h"
 
+Movement::Movement()
+{
+	Component::Initialize("movement", ComponentType::Movement);
+}
+
 //Void Initialize
-void Movement::Initialize(char* comName, ComponentType comType, Gameobject* gb)
+void Movement::Initialize(Gameobject* gb)
 {
 	//Initialize the base.
-	Component::Initialize(comName, comType, gb);
+	Component::SetGameObject(gb);
 }
 
 void Movement::Update(void)

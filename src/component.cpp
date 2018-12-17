@@ -5,24 +5,28 @@
 #include "typedefs/utils.h"
 
 //Void Initialize
-void Component::Initialize(char* comName, ComponentType comType, Gameobject* gb)
+void Component::Initialize(const char* comName, ComponentType comType)
 {
 	//Set name and type.
 	this->name = comName;
 	this->type = comType;
-	this->gameObject = gb;
 }
 
 //Void Update
 void Component::Update(void)
 {
-
+	
 }
 
 //Void Update
 void Component::Cleanup(void)
 {
 	this->name = "";
+}
+
+void Component::SetGameObject(Gameobject* gb)
+{
+	this->gameObject = gb;
 }
 
 //GetType.
