@@ -7,6 +7,7 @@
 #include "typedefs/color.h"
 #include "components/component.h"
 #include "components/movement.h"
+#include "components/collision.h"
 #include "components/shooting.h"
 #include "components/bullet.h"
 
@@ -22,7 +23,7 @@ Scene::Scene()
 void Scene::Initialize(void)
 {
 	AddGameobject("player1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::YELLOW));
-	AddGameobject("player2", CreateMode::EMPTY, this->GetGameobject("player1"));
+	AddGameobject("player2", CreateMode::EMPTY);
 
 	Vertex* v = new Vertex[4];
 	ui32* i = new ui32[6];
@@ -50,18 +51,21 @@ void Scene::Initialize(void)
 
 	Movement* mov = new Movement;
 	Shooting* shot = new Shooting;
+	Collision* col = new Collision;
+
 	AddComponent(this->gameObjects["player1"], mov);
 	AddComponent(this->gameObjects["player1"], shot);
+	AddComponent(this->gameObjects["player1"], col);
 
-	this->gameObjects["player1"]->GetTransform().position = { 0, -0.7f, 0.0f };
-	this->gameObjects["player1"]->GetTransform().scaling = { 20, 40, 0 };
+	this->gameObjects["player1"]->GetTransform().position = { 0, 70.0f, 0.0f };
+	this->gameObjects["player1"]->GetTransform().scaling = { 0.2f, 0.4f, 0 };
 }
 
 void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent, fColorRGBA color)
 {
 	if (mode == CreateMode::EMPTY)
 	{
-		this->gameObjects[name] = new Gameobject(false, false, false, parent);
+		this->gameObjects[name] = new Gameobject(false, false, false, parent, color, true);
 		this->gameObjects[name]->SetName(name);
 
 		Application::GetInstancePtr()->AddGameobject(this->gameObjects[name]);
@@ -74,7 +78,7 @@ void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent,
 	}
 	else if (mode == CreateMode::NORMAL)
 	{
-		this->gameObjects[name] = new Gameobject(true, false, false, parent, color);
+		this->gameObjects[name] = new Gameobject(true, false, false, parent, color, true);
 		this->gameObjects[name]->SetName(name);
 
 		Application::GetInstancePtr()->AddGameobject(this->gameObjects[name]);
@@ -108,6 +112,9 @@ void Scene::AddComponent(Gameobject* gb, Component* com)
 	case ComponentType::Bullet:
 		(reinterpret_cast<Bullet*>(com))->Initialize(gb);
 		break;
+	case ComponentType::Collision:
+		(reinterpret_cast<Collision*>(com))->Initialize(gb);
+		break;
 	}
 
 	gb->AddComponent(com);
@@ -118,9 +125,15 @@ Gameobject* Scene::GetGameobject(std::string name)
 	return this->gameObjects[name];
 }
 
+Gameobject* Scene::GetGameobject()
+{
+	return this->root;
+}
+
 void Scene::Update(void)
 {
 	this->root->Update();
+
 }
 
 void Scene::Cleanup(void)

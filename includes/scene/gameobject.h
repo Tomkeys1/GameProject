@@ -22,7 +22,8 @@ public:
 	(
 		bool render = true, bool isRoot = false, bool cam = false,
 		Gameobject* parent = nullptr,
-		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f }
+		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f },
+		bool hasCollision = false
 	);
 
 	Gameobject
@@ -45,8 +46,12 @@ public:
 	void SetName(const char* gameobjectName);
 	void SetVisiblity(bool b);
 	void SetVisi(bool b);
+	void SetCollision(bool b);
+	void SetIsColliding(bool b);
 
 	bool hasMesh(void);
+	bool hasCollision(void);
+	bool isColliding();
 	bool isVisisble(void);
 
 	const char* GetName(void);
@@ -68,5 +73,7 @@ private:
 
 	const char* name;
 	bool bMesh;
+	bool collision;
+	bool is_colliding =  false;
 	bool isRendering = true;
 };

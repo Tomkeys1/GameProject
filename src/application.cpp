@@ -50,7 +50,6 @@ void Application::Update(void)
 
 		if (Input::GetInstancePtr()->GetUpState())
 			Input::GetInstancePtr()->EradicateUpKeys();
-
 	} while (true);
 }
 
@@ -88,8 +87,5 @@ Scene* Application::GetScene()
 	return this->scene;
 }
 
-Gameobject* Application::GetRoot()
-{
-	return this->root;
-}
+
 

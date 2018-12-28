@@ -34,7 +34,7 @@ public:
 	Filesystem* GetFilesystem();
 	Renderer* GetRenderer();
 	Scene* GetScene();
-	Gameobject* GetRoot();
+	//Gameobject* GetRoot();
 //Declare private variables
 private:
 	Scene* scene;

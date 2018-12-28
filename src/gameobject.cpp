@@ -5,16 +5,19 @@
 #include "components/movement.h"
 #include "components/shooting.h"
 #include "components/bullet.h"
+#include "components/collision.h"
 #include "rendering/geometry.h"
 #include "rendering/shader.h"
 
 //Gameobject Constructor.
-Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, fColorRGBA col)
+Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, fColorRGBA col, bool hasCollision)
 {
 	//Set this gameobjects position, scaling and rotation to 0;
 	this->transform.position = { 0, 0, 0 };
-	this->transform.scaling = { 100, 100, 0 };
+	this->transform.scaling = { 1, 1, 0 };
 	this->transform.rotation = { 1, 0, 0, 0 };
+
+	this->collision = hasCollision;
 
 	if (cam)
 		return;
@@ -69,6 +72,9 @@ void Gameobject::Update(void)
 			case ComponentType::Bullet:
 				(reinterpret_cast<Bullet*>(component))->Update();
 				break;
+			case ComponentType::Collision:
+				(reinterpret_cast<Collision*>(component))->Update();
+				break;
 		}
 	}
 }
@@ -94,6 +100,9 @@ void Gameobject::Cleanup(void)
 			break;
 		case ComponentType::Bullet:
 			(reinterpret_cast<Bullet*>(component))->Cleanup();
+			break;
+		case ComponentType::Collision:
+			(reinterpret_cast<Collision*>(component))->Cleanup();
 			break;
 		}
 
@@ -145,9 +154,9 @@ const char* Gameobject::GetName(void)
 Math::Mat4x4 Gameobject::GetModelMatrix(void)
 {
 	this->modelMatrix = Math::Mat4x4::identity;
-	modelMatrix = modelMatrix * Math::CreateScalingMatrix(this->transform.scaling);
 	modelMatrix = modelMatrix * Math::CreateRotationMatrix(Math::Vec3{ this->transform.rotation.x, this->transform.rotation.y, this->transform.rotation.z});
-	modelMatrix = modelMatrix * Math::CreateTranslationMatrix(this->transform.position);
+	modelMatrix = modelMatrix * Math::CreateScalingMatrix(this->transform.scaling * 100.0f);
+	modelMatrix = modelMatrix * Math::CreateTranslationMatrix(this->transform.position / 100.0f);
 
 	return this->modelMatrix;
 }
@@ -191,11 +200,31 @@ void Gameobject::SetVisi(bool b)
 	this->isRendering = b;
 }
 
+void Gameobject::SetCollision(bool b)
+{
+	this->collision = b;
+}
+
+void Gameobject::SetIsColliding(bool b)
+{
+	this->is_colliding = b;
+}
+
 bool Gameobject::hasMesh()
 {
 	if (this->bMesh == true)
 		return true;
 	return false;
+}
+
+bool Gameobject::hasCollision(void)
+{
+	return this->collision;
+}
+
+bool Gameobject::isColliding()
+{
+	return this->is_colliding;
 }
 
 bool Gameobject::isVisisble(void)

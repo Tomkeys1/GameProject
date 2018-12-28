@@ -238,7 +238,7 @@ namespace Math
 		};
 	}
 
-	inline Mat4x4 CreateRotationMatrix2(const Quaternion& rotation)
+	inline Mat4x4 CreateRotationMatrixQuaternion(const Quaternion& rotation)
 	{
 		return Mat4x4
 		{
@@ -249,17 +249,13 @@ namespace Math
 		};
 	}
 
-	inline Mat4x4 CreateRotationMatrix(const Vec3& rotationVec)
+	inline Mat4x4 CreateRotationMatrix(const Vec3& eulerRotation)
 	{
-		Mat4x4 temp;
-		Mat4x4 rot = Mat4x4::identity;
+		real thetha = eulerRotation.x * M_PI / 180.0f;
+		real psi = eulerRotation.y * M_PI / 180.0f;
+		real kappa = eulerRotation.z * M_PI / 180.0f;
 
-		temp = Math::CreateRotationXMatrix(rotationVec.x);
-		rot = rot * temp;
-		temp = Math::CreateRotationYMatrix(rotationVec.y);
-		rot = rot * temp;
-		temp = Math::CreateRotationZMatrix(rotationVec.z);
-		rot = rot * temp;
+		Mat4x4 rot = Math::CreateRotationXMatrix(thetha) * Math::CreateRotationYMatrix(psi) * Math::CreateRotationZMatrix(kappa);
 
 		return rot;
 	}

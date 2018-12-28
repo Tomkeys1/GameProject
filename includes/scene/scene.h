@@ -31,6 +31,7 @@ public:
 	void AddComponent(Gameobject* gb, Component* comType);
 
 	Gameobject* GetGameobject(std::string name);
+	Gameobject* GetGameobject();
 
 private:
 	Gameobject* root;
