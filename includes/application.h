@@ -34,13 +34,14 @@ public:
 	Filesystem* GetFilesystem();
 	Renderer* GetRenderer();
 	Scene* GetScene();
-	//Gameobject* GetRoot();
+
 //Declare private variables
 private:
+	bool running = true;
+
 	Scene* scene;
 	Filesystem* filesystem;
 	Renderer* renderer;
-
 	Gameobject* root;
 
 	std::vector<Gameobject*> gameObjects;

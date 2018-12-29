@@ -21,6 +21,7 @@ public:
 	void SetColor(fColorRGBA color);
 
 	Gameobject* GetGameobject(void);
+	Vertex* GetVertices(void);
 
 	ui32 vLength;
 	ui32 iLength;

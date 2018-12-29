@@ -22,22 +22,24 @@ void Movement::Update(void)
 	//Execute the components Update function.
 	Component::Update();
 
-
-	if (Input::GetInstancePtr()->GetKey(KeyCode::W))
+	if (!this->GetGameObject()->isColliding())
 	{
-		this->GetGameObject()->GetTransform().position.y += 0.01f;
-	}
-	else if (Input::GetInstancePtr()->GetKey(KeyCode::S))
-	{
-		this->GetGameObject()->GetTransform().position.y -= 0.01f;
-	}
-	else if (Input::GetInstancePtr()->GetKey(KeyCode::A))
-	{
-		this->GetGameObject()->GetTransform().position.x -= 0.01f;
-	}
-	else if (Input::GetInstancePtr()->GetKey(KeyCode::D))
-	{
-		this->GetGameObject()->GetTransform().position.x += 0.01f;
+		if (Input::GetInstancePtr()->GetKey(KeyCode::W))
+		{
+			this->GetGameObject()->GetTransform().position.y += 0.01f;
+		}
+		else if (Input::GetInstancePtr()->GetKey(KeyCode::S))
+		{
+			this->GetGameObject()->GetTransform().position.y -= 0.01f;
+		}
+		else if (Input::GetInstancePtr()->GetKey(KeyCode::A))
+		{
+			this->GetGameObject()->GetTransform().position.x -= 0.01f;
+		}
+		else if (Input::GetInstancePtr()->GetKey(KeyCode::D))
+		{
+			this->GetGameObject()->GetTransform().position.x += 0.01f;
+		}
 	}
 
 

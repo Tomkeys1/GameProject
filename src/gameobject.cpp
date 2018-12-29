@@ -18,6 +18,7 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 	this->transform.rotation = { 1, 0, 0, 0 };
 
 	this->collision = hasCollision;
+	this->hitObject = nullptr;
 
 	if (cam)
 		return;
@@ -178,6 +179,11 @@ Shader* Gameobject::GetMaterial(void)
 	return this->material;
 }
 
+Gameobject * Gameobject::GetHitObject(void)
+{
+	return this->hitObject;
+}
+
 //Set name
 void Gameobject::SetName(const char* gameobjectName)
 {
@@ -210,6 +216,16 @@ void Gameobject::SetIsColliding(bool b)
 	this->is_colliding = b;
 }
 
+void Gameobject::SetIsTrigger(bool b)
+{
+	this->is_trigger = b;
+}
+
+void Gameobject::SetHitObject(Gameobject* hit)
+{
+	this->hitObject = hit;
+}
+
 bool Gameobject::hasMesh()
 {
 	if (this->bMesh == true)
@@ -225,6 +241,11 @@ bool Gameobject::hasCollision(void)
 bool Gameobject::isColliding()
 {
 	return this->is_colliding;
+}
+
+bool Gameobject::isTrigger(void)
+{
+	return this->is_trigger;
 }
 
 bool Gameobject::isVisisble(void)

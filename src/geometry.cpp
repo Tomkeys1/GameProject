@@ -130,3 +130,8 @@ Gameobject* Geometry::GetGameobject(void)
 {
 	return this->gameobject;
 }
+
+Vertex* Geometry::GetVertices(void)
+{
+	return this->vertices;
+}

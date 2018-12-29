@@ -48,10 +48,13 @@ public:
 	void SetVisi(bool b);
 	void SetCollision(bool b);
 	void SetIsColliding(bool b);
+	void SetIsTrigger(bool b);
+	void SetHitObject(Gameobject* hit);
 
 	bool hasMesh(void);
 	bool hasCollision(void);
 	bool isColliding();
+	bool isTrigger(void);
 	bool isVisisble(void);
 
 	const char* GetName(void);
@@ -59,10 +62,11 @@ public:
 	Transform& GetTransform(void);
 	Geometry* GetMesh(void);
 	Shader* GetMaterial(void);
+	Gameobject* GetHitObject(void);
 
 //Declare private variables.
 private:
-
+	Gameobject* hitObject;
 	Geometry* mesh;
 	Shader* material;
 
@@ -75,5 +79,6 @@ private:
 	bool bMesh;
 	bool collision;
 	bool is_colliding =  false;
+	bool is_trigger = false;
 	bool isRendering = true;
 };

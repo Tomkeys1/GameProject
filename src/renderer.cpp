@@ -187,6 +187,11 @@ void Renderer::InitializeGameobject(Gameobject* gb)
 		this->gameObjects.push_back(gb);
 }
 
+Camera* Renderer::GetCamera(void)
+{
+	return this->camera;
+}
+
 //Void GetAdapters
 void Renderer::GetAdapters()
 {

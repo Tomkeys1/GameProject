@@ -8,6 +8,7 @@
 #include "systems/console.h"
 #include "systems/inputhandler.h"
 #include "scene/scene.h"
+#include "typedefs/time.h"
 
 //Declare Application as a Singleton.
 DECLARE_SINGLETON(Application)
@@ -32,25 +33,32 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 //Void Updatea
 void Application::Update(void)
 {
+	real previous = GetCurrentTime();
+
 	//Do loop.
 	do
 	{
-		// Pump window messages
-		Window::GetInstancePtr()->DispatchMessages();
+		real current = GetCurrentTime();
+		real elapsed = current - previous;
 
-		//If escape key, close window.
-		if (Input::GetInstancePtr()->GetKeyDown(KeyCode::Escape))
+		// Input Handling
+		Window::GetInstancePtr()->DispatchMessages();
+		if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Escape))
 			break;
 
 		// Update Gamestate
+		Time::deltaTime = elapsed;
 		this->scene->Update();
+
+		if (Input::GetInstancePtr()->GetUpState())
+			Input::GetInstancePtr()->EradicateUpKeys();
 
 		// Render Gamestate
 		Application::renderer->Render();
 
-		if (Input::GetInstancePtr()->GetUpState())
-			Input::GetInstancePtr()->EradicateUpKeys();
-	} while (true);
+		previous = current;
+
+	} while (running);
 }
 
 //Void Cleanup

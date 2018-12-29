@@ -21,6 +21,8 @@ public:
 	void CleanUp(void);
 	void InitializeGameobject(Gameobject* gb);
 
+	Camera* GetCamera(void);
+
 	ID3D11VertexShader* mvertexShader;
 	ID3D11PixelShader* mpixelShader;
 	ID3D11InputLayout* mlayout;

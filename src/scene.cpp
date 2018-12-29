@@ -10,7 +10,7 @@
 #include "components/collision.h"
 #include "components/shooting.h"
 #include "components/bullet.h"
-
+#include "rendering/camera.h"
 
 Scene::Scene()
 {
@@ -22,50 +22,36 @@ Scene::Scene()
 
 void Scene::Initialize(void)
 {
+	//Gameobject Creation Stage
 	AddGameobject("player1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::YELLOW));
-	AddGameobject("player2", CreateMode::EMPTY);
+	AddGameobject("object1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::RED));
+	AddGameobject("object2", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::BLUE));
 
-	Vertex* v = new Vertex[4];
-	ui32* i = new ui32[6];
 
-	v[0].position = fColorRGBA{ -1, 1, 0, 1.0f };
-	v[0].color = Color::GetColor(ColorCode::BLUE);
-
-	v[1].position = fColorRGBA{ 1, 1, 0, 1.0f };
-	v[1].color = Color::GetColor(ColorCode::BLUE);
-
-	v[2].position = fColorRGBA{ 1, -1, 0, 1.0f };
-	v[2].color = Color::GetColor(ColorCode::BLUE);
-
-	v[3].position = fColorRGBA{ -1, -1, 0, 1.0f };
-	v[3].color = Color::GetColor(ColorCode::BLUE);
-
-	i[0] = 3;
-	i[1] = 0;
-	i[2] = 1;
-	i[3] = 3;
-	i[4] = 1;
-	i[5] = 2;
-
-	AddMesh(this->gameObjects["player2"], v, i, 4, 6);
-
+	//Component Creation Stage
 	Movement* mov = new Movement;
 	Shooting* shot = new Shooting;
 	Collision* col = new Collision;
 
+	//Component Allocation Stage
 	AddComponent(this->gameObjects["player1"], mov);
 	AddComponent(this->gameObjects["player1"], shot);
 	AddComponent(this->gameObjects["player1"], col);
 
-	this->gameObjects["player1"]->GetTransform().position = { 0, 70.0f, 0.0f };
+	//Gameobject Allocation Stage
+	this->gameObjects["player1"]->GetTransform().position = { 0, -70.0f, 0.0f };
+	this->gameObjects["object1"]->GetTransform().position = { 50, 0.0f, 0.0f };
+	this->gameObjects["object2"]->GetTransform().position = { -50, 0.0f, 0.0f };
+
 	this->gameObjects["player1"]->GetTransform().scaling = { 0.2f, 0.4f, 0 };
+
 }
 
 void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent, fColorRGBA color)
 {
 	if (mode == CreateMode::EMPTY)
 	{
-		this->gameObjects[name] = new Gameobject(false, false, false, parent, color, true);
+		this->gameObjects[name] = new Gameobject(false, false, false, parent, color, false);
 		this->gameObjects[name]->SetName(name);
 
 		Application::GetInstancePtr()->AddGameobject(this->gameObjects[name]);
@@ -133,7 +119,6 @@ Gameobject* Scene::GetGameobject()
 void Scene::Update(void)
 {
 	this->root->Update();
-
 }
 
 void Scene::Cleanup(void)

@@ -2,13 +2,14 @@
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
 #include "application.h"
-#include "math/vector3.h"
-#include "math/vector2.h"
 #include "scene/gameobject.h"
 #include "scene/scene.h"
 #include "systems/inputhandler.h"
 #include "components/collision.h"
 #include "typedefs/utils.h"
+#include "rendering/camera.h"
+#include "rendering/renderer.h"
+
 
 Collision::Collision()
 {
@@ -37,11 +38,31 @@ void Collision::Update(void)
 			{
 				if (Math::Distance(this->GetGameObject()->GetTransform().position, temp->GetTransform().position) < this->collisionRange)
 				{
-					this->GetGameObject()->SetIsColliding(CheckCollision(temp));
+					if (CheckCollision(temp) == true)
+					{
+						if (this->GetGameObject()->GetHitObject() == nullptr)
+						{
+							this->GetGameObject()->SetHitObject(temp);
+						}
+
+						this->GetGameObject()->SetIsColliding(true);
+					}
+					else
+					{
+						if (this->GetGameObject()->GetHitObject() == temp)
+						{
+							this->GetGameObject()->SetHitObject(nullptr);
+							this->GetGameObject()->SetIsColliding(false);
+						}
+					}
 				}
 				else
 				{
-					this->GetGameObject()->SetIsColliding(false);
+					if (this->GetGameObject()->GetHitObject() == temp)
+					{
+						this->GetGameObject()->SetHitObject(nullptr);
+						this->GetGameObject()->SetIsColliding(false);
+					}
 				}
 			}
 		}
@@ -56,19 +77,38 @@ void Collision::Cleanup(void)
 
 bool Collision::CheckCollision(Gameobject* gb)
 {
-	Math::Vec2 A = { this->GetGameObject()->GetTransform().position.x, this->GetGameObject()->GetTransform().position.y };
-	Math::Vec2 B = { gb->GetTransform().position.x, gb->GetTransform().position.y };
+	Math::Vec3 A_minPosition = GetBoxPosition(this->GetGameObject(), fColorRGBA{ -1, -1, 0, 1.0f });
+	Math::Vec3 A_maxPosition = GetBoxPosition(this->GetGameObject(), fColorRGBA{ 1, 1, 0, 1.0f });
 
-	real aWidth = (this->GetGameObject()->GetTransform().scaling.x * 16.25f);
-	real aHeight = (this->GetGameObject()->GetTransform().scaling.y * 25.15f);
+	Math::Vec3 B_minPosition = GetBoxPosition(gb, fColorRGBA{ -1, -1, 0, 1.0f });
+	Math::Vec3 B_maxPosition = GetBoxPosition(gb, fColorRGBA{ 1, 1, 0, 1.0f });
 
-	real bWidth = (gb->GetTransform().scaling.x * 16.25f);
-	real bHeight = (gb->GetTransform().scaling.y * 25.15f);
-
-	if ((A.x + aWidth) <= (B.x - bWidth)) return false;
-	if ((A.x - aWidth) >= (B.x + bWidth)) return false;
-	if ((A.y + aHeight) <= (B.y - bHeight)) return false;
-	if ((A.y - aHeight) >= (B.y + bHeight)) return false;
+	if (B_minPosition.x - A_maxPosition.x > 0) return false;
+	if (A_minPosition.x - B_maxPosition.x > 0) return false;
+	if (B_minPosition.y - A_maxPosition.y > 0) return false;
+	if (A_minPosition.y - B_maxPosition.y > 0) return false;
 
 	return true;
 }
+
+Math::Vec3 Collision::GetBoxPosition(Gameobject* gb, fColorRGBA pos)
+{
+	Math::Mat4x4 mvp = Application::GetInstancePtr()->GetRenderer()->GetCamera()->GetVP() * gb->GetModelMatrix();
+
+	fColorRGBA temp2 =
+	{
+		mvp.m11 * pos.r + mvp.m12 * pos.g + mvp.m13 * pos.b + mvp.m14 * pos.a,
+		mvp.m21 * pos.r + mvp.m22 * pos.g + mvp.m23 * pos.b + mvp.m24 * pos.a,
+		mvp.m31 * pos.r + mvp.m32 * pos.g + mvp.m33 * pos.b + mvp.m34 * pos.a,
+		mvp.m41 * pos.r + mvp.m42 * pos.g + mvp.m43 * pos.b + mvp.m44 * pos.a,
+	};
+
+	return Math::Vec3
+	{
+		gb->GetTransform().position.x + temp2.r * 100.0f,
+		gb->GetTransform().position.y + temp2.g * 100.0f,
+		0.0f,
+	};
+}
+
+

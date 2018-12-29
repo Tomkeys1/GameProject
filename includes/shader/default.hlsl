@@ -18,8 +18,8 @@ VertexOUT Default_VS(in VertexIN input)
 {
 	VertexOUT output;
 
-    output.position = mul(mvp, float4(input.position.xyz, 1.0f));//mul(float4(input.position.xyz, 1.0f), mvp);
-	output.position /= output.position.w;
+    output.position = mul(mvp, float4(input.position.xyz, 1.0f));
+	//output.position /= output.position.w;
     output.color = input.color;
 
     return output;
