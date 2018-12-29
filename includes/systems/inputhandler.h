@@ -20,6 +20,7 @@ public:
 	bool GetKeyHold(KeyCode key);
 	bool GetKey(KeyCode key);
 	bool GetUpState(void);
+	bool GetAnyKey(void);
 
 private:
 	std::map<KeyCode, KeyCode> downKeys;

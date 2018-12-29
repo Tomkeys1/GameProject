@@ -16,6 +16,7 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 	this->transform.position = { 0, 0, 0 };
 	this->transform.scaling = { 1, 1, 0 };
 	this->transform.rotation = { 1, 0, 0, 0 };
+	this->eulerRotation = { 0, 0, 0 };
 
 	this->collision = hasCollision;
 	this->hitObject = nullptr;
@@ -152,10 +153,20 @@ const char* Gameobject::GetName(void)
 	return this->name;
 }
 
+Math::Vec3& Gameobject::GetEulerRotation(void)
+{
+	return this->eulerRotation;
+}
+
+Math::Quaternion Gameobject::GetRotation(void)
+{
+	return this->transform.rotation;
+}
+
 Math::Mat4x4 Gameobject::GetModelMatrix(void)
 {
 	this->modelMatrix = Math::Mat4x4::identity;
-	modelMatrix = modelMatrix * Math::CreateRotationMatrix(Math::Vec3{ this->transform.rotation.x, this->transform.rotation.y, this->transform.rotation.z});
+	modelMatrix = modelMatrix * Math::CreateRotationMatrix(this->eulerRotation);
 	modelMatrix = modelMatrix * Math::CreateScalingMatrix(this->transform.scaling * 100.0f);
 	modelMatrix = modelMatrix * Math::CreateTranslationMatrix(this->transform.position / 100.0f);
 

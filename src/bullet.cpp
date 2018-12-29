@@ -23,7 +23,7 @@ void Bullet::Update(void)
 
 	if (this->time > 0.0f)
 	{
-		this->GetGameObject()->GetTransform().position.y += speed;
+		this->GetGameObject()->GetTransform().position += this->dir * this->speed;
 		this->time -= 0.0008f;
 	}
 	else
@@ -37,8 +37,9 @@ void Bullet::Cleanup(void)
 	Component::Cleanup();
 }
 
-void Bullet::SetBulletValues(real speed, real time)
+void Bullet::SetBulletValues(real speed, real time, Math::Vec3 direction)
 {
 	this->time = time;
 	this->speed = speed;
+	this->dir = direction;
 }

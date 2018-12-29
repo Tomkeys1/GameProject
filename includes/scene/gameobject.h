@@ -58,6 +58,8 @@ public:
 	bool isVisisble(void);
 
 	const char* GetName(void);
+	Math::Vec3& GetEulerRotation(void);
+	Math::Quaternion GetRotation(void);
 	Math::Mat4x4 GetModelMatrix(void);
 	Transform& GetTransform(void);
 	Geometry* GetMesh(void);
@@ -71,6 +73,7 @@ private:
 	Shader* material;
 
 	Transform transform;
+	Math::Vec3 eulerRotation;
 	Math::Mat4x4 modelMatrix;
 
 	std::vector<Component*> components;

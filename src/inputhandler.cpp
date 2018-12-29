@@ -79,3 +79,10 @@ bool Input::GetUpState(void)
 		return true;
 	return false;
 }
+
+bool Input::GetAnyKey(void)
+{
+	if (this->downKeys.size() != 0 || this->holdKeys.size() != 0)
+		return true;
+	return false;
+}

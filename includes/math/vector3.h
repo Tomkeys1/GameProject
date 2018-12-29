@@ -230,4 +230,43 @@ namespace Math
 
 		return temp;
 	}
+
+	inline Vec3 GetForwardVector(const Vec3& rotation)
+	{
+		real roll = rotation.x * M_PI / 180.0f;
+		real pitch = rotation.y * M_PI / 180.0f;
+		real yaw = rotation.z * M_PI / 180.0f;
+
+
+		return Vec3
+		{
+			-cos(yaw) * sin(pitch) * sin(roll) - sin(yaw) * cos(roll),
+			-sin(yaw) * sin(pitch) * sin(roll) + cos(yaw) * cos(roll),
+			cos(pitch) * sin(roll)
+		};
+	}
+
+	inline Vec3 GetRightVector(const Vec3& rotation)
+	{
+		real roll = rotation.x * M_PI / 180.0f;
+		real pitch = rotation.y * M_PI / 180.0f;
+		real yaw = rotation.z * M_PI / 180.0f;
+
+		return Vec3
+		{
+			cos(yaw) * cos(pitch),
+			sin(yaw) * cos(pitch),
+			sin(pitch)
+		};
+	}
+
+	inline Vec3 Negate(const Vec3& vec)
+	{
+		return Vec3
+		{
+			-vec.x,
+			-vec.y,
+			-vec.z
+		};
+	}
 }

@@ -43,6 +43,8 @@ void Collision::Update(void)
 						if (this->GetGameObject()->GetHitObject() == nullptr)
 						{
 							this->GetGameObject()->SetHitObject(temp);
+							temp->SetHitObject(this->GetGameObject());
+							temp->SetIsColliding(true);
 						}
 
 						this->GetGameObject()->SetIsColliding(true);
@@ -53,6 +55,8 @@ void Collision::Update(void)
 						{
 							this->GetGameObject()->SetHitObject(nullptr);
 							this->GetGameObject()->SetIsColliding(false);
+							temp->SetHitObject(nullptr);
+							temp->SetIsColliding(true);
 						}
 					}
 				}
@@ -62,6 +66,8 @@ void Collision::Update(void)
 					{
 						this->GetGameObject()->SetHitObject(nullptr);
 						this->GetGameObject()->SetIsColliding(false);
+						temp->SetHitObject(nullptr);
+						temp->SetIsColliding(false);
 					}
 				}
 			}

@@ -22,28 +22,27 @@ Scene::Scene()
 
 void Scene::Initialize(void)
 {
-	//Gameobject Creation Stage
 	AddGameobject("player1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::YELLOW));
-	AddGameobject("object1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::RED));
-	AddGameobject("object2", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::BLUE));
 
-
-	//Component Creation Stage
 	Movement* mov = new Movement;
 	Shooting* shot = new Shooting;
 	Collision* col = new Collision;
 
-	//Component Allocation Stage
 	AddComponent(this->gameObjects["player1"], mov);
 	AddComponent(this->gameObjects["player1"], shot);
 	AddComponent(this->gameObjects["player1"], col);
 
-	//Gameobject Allocation Stage
-	this->gameObjects["player1"]->GetTransform().position = { 0, -70.0f, 0.0f };
-	this->gameObjects["object1"]->GetTransform().position = { 50, 0.0f, 0.0f };
-	this->gameObjects["object2"]->GetTransform().position = { -50, 0.0f, 0.0f };
+	mov->velocity = 0.00001f;
+	mov->maxSpeed = 0.01f;
 
+	this->gameObjects["player1"]->GetTransform().position = { 0, -70.0f, 0.0f };
 	this->gameObjects["player1"]->GetTransform().scaling = { 0.2f, 0.4f, 0 };
+
+
+	AddGameobject("object1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::RED));
+
+	this->gameObjects["object1"]->GetTransform().position = { 0, 0.0f, 0.0f };
+
 
 }
 
