@@ -1,13 +1,16 @@
 
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
+#include "application.h"
 #include "scene/gameobject.h"
 #include "components/movement.h"
 #include "components/shooting.h"
 #include "components/bullet.h"
 #include "components/collision.h"
+#include "rendering/renderer.h"
 #include "rendering/geometry.h"
 #include "rendering/shader.h"
+#include "rendering/camera.h"
 
 //Gameobject Constructor.
 Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, fColorRGBA col, bool hasCollision)
@@ -65,17 +68,17 @@ void Gameobject::Update(void)
 		//Update the casted components.
 		switch (component->GetType()) 
 		{
-			case ComponentType::Movement :
-				(reinterpret_cast<Movement*>(component))->Update();
+			case ComponentType::Bullet:
+				(reinterpret_cast<Bullet*>(component))->Update();
 				break;
 			case ComponentType::Shoot:
 				(reinterpret_cast<Shooting*>(component))->Update();
 				break;
-			case ComponentType::Bullet:
-				(reinterpret_cast<Bullet*>(component))->Update();
-				break;
 			case ComponentType::Collision:
 				(reinterpret_cast<Collision*>(component))->Update();
+				break;
+			case ComponentType::Movement :
+				(reinterpret_cast<Movement*>(component))->Update();
 				break;
 		}
 	}
@@ -153,6 +156,46 @@ const char* Gameobject::GetName(void)
 	return this->name;
 }
 
+Math::Vec3 Gameobject::GetWorldCorner(fColorRGBA corner)
+{
+	Math::Mat4x4 mvp = Application::GetInstancePtr()->GetRenderer()->GetCamera()->GetVP() * this->GetModelMatrixInvertRotation();
+
+	fColorRGBA temp2 =
+	{
+		mvp.m11 * corner.r + mvp.m12 * corner.g + mvp.m13 * corner.b + mvp.m14 * corner.a,
+		mvp.m21 * corner.r + mvp.m22 * corner.g + mvp.m23 * corner.b + mvp.m24 * corner.a,
+		mvp.m31 * corner.r + mvp.m32 * corner.g + mvp.m33 * corner.b + mvp.m34 * corner.a,
+		mvp.m41 * corner.r + mvp.m42 * corner.g + mvp.m43 * corner.b + mvp.m44 * corner.a,
+	};
+
+	return Math::Vec3
+	{
+		this->GetTransform().position.x + temp2.r * 100.0f,
+		this->GetTransform().position.y + temp2.g * 100.0f,
+		0.0f,
+	};
+}
+
+Math::Vec3 Gameobject::GetWorldCorner(fColorRGBA corner, Math::Mat4x4 matrix)
+{
+	Math::Mat4x4 mvp = Application::GetInstancePtr()->GetRenderer()->GetCamera()->GetVP() * matrix;
+
+	fColorRGBA temp2 =
+	{
+		mvp.m11 * corner.r + mvp.m12 * corner.g + mvp.m13 * corner.b + mvp.m14 * corner.a,
+		mvp.m21 * corner.r + mvp.m22 * corner.g + mvp.m23 * corner.b + mvp.m24 * corner.a,
+		mvp.m31 * corner.r + mvp.m32 * corner.g + mvp.m33 * corner.b + mvp.m34 * corner.a,
+		mvp.m41 * corner.r + mvp.m42 * corner.g + mvp.m43 * corner.b + mvp.m44 * corner.a,
+	};
+
+	return Math::Vec3
+	{
+		this->GetTransform().position.x + temp2.r * 100.0f,
+		this->GetTransform().position.y + temp2.g * 100.0f,
+		0.0f,
+	};
+}
+
 Math::Vec3& Gameobject::GetEulerRotation(void)
 {
 	return this->eulerRotation;
@@ -171,6 +214,26 @@ Math::Mat4x4 Gameobject::GetModelMatrix(void)
 	modelMatrix = modelMatrix * Math::CreateTranslationMatrix(this->transform.position / 100.0f);
 
 	return this->modelMatrix;
+}
+
+Math::Mat4x4 Gameobject::GetModelMatrixNoRotation(void)
+{
+	Math::Mat4x4 temp = Math::Mat4x4::identity;
+	temp = temp * Math::CreateRotationMatrix(Math::Vec3::zero);
+	temp = temp * Math::CreateScalingMatrix(this->transform.scaling * 100.0f);
+	temp = temp * Math::CreateTranslationMatrix(this->transform.position / 100.0f);
+
+	return temp;
+}
+
+Math::Mat4x4 Gameobject::GetModelMatrixInvertRotation(void)
+{
+	Math::Mat4x4 temp = Math::Mat4x4::identity;
+	temp = temp * Math::CreateRotationMatrix(Math::Negate(this->eulerRotation));
+	temp = temp * Math::CreateScalingMatrix(this->transform.scaling * 100.0f);
+	temp = temp * Math::CreateTranslationMatrix(this->transform.position / 100.0f);
+
+	return temp;
 }
 
 //GetTransform

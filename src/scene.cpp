@@ -42,8 +42,7 @@ void Scene::Initialize(void)
 	AddGameobject("object1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::RED));
 
 	this->gameObjects["object1"]->GetTransform().position = { 0, 0.0f, 0.0f };
-
-
+	this->gameObjects["object1"]->SetIsTrigger(true);
 }
 
 void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent, fColorRGBA color)

@@ -42,10 +42,12 @@ void Shooting::Update(void)
 	{
 		if (this->GetGameObject()->isVisisble())
 		{
-			Application::GetInstancePtr()->GetScene()->AddGameobject("shot", CreateMode::NORMAL, this->GetGameObject(), Color::GetColor(ColorCode::RED));
-			Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetGameobject("shot");
+			std::string tempStr = this->GetGameObject()->GetName();
+			tempStr += " shot";
+			Application::GetInstancePtr()->GetScene()->AddGameobject(tempStr.c_str(), CreateMode::NORMAL, this->GetGameObject(), Color::GetColor(ColorCode::RED));
+			Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetGameobject(tempStr.c_str());
 			temp->GetTransform().scaling = { 0.05f, 0.15f, 0 };
-			temp->GetTransform().position = this->GetGameObject()->GetTransform().position + Math::GetForwardVector(this->GetGameObject()->GetEulerRotation()) * speed;
+			temp->GetTransform().position = GetPos(temp);
 			temp->GetEulerRotation() = this->GetGameObject()->GetEulerRotation();
 			
 			Bullet* bullet = new Bullet;
@@ -60,4 +62,15 @@ void Shooting::Cleanup(void)
 {
 	Component::Cleanup();
 
+}
+
+Math::Vec3 Shooting::GetPos(Gameobject* gb)
+{
+	Math::Vec3 temp = Math::Vec3{ this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }).x, this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }).y, 0.0f };
+
+	real middle = Math::Distance(this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }), temp);
+	middle = middle * 0.5f;
+	temp.x += middle;
+
+	return temp;
 }

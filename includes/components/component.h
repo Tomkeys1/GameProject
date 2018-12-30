@@ -3,14 +3,7 @@
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
 #include "scene/gameobject.h"
-
-enum class ComponentType
-{
-	Movement = 0,
-	Shoot = 1,
-	Bullet = 2,
-	Collision = 3
-};
+#include "typedefs/components.h"
 
 
 class Component 

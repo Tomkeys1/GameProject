@@ -28,6 +28,11 @@ void Collision::Update(void)
 	//Execute the components Update function.
 	Component::Update();
 
+	if (Input::GetInstancePtr()->GetKey(KeyCode::B))
+	{
+		real f = 0.01f;
+	}
+
 	for (Node* gb : Application::GetInstancePtr()->GetScene()->GetGameobject()->GetAllChildren())
 	{
 		Gameobject* temp = reinterpret_cast<Gameobject*>(gb);
@@ -36,7 +41,7 @@ void Collision::Update(void)
 		{
 			if (temp != this->GetGameObject())
 			{
-				if (Math::Distance(this->GetGameObject()->GetTransform().position, temp->GetTransform().position) < this->collisionRange)
+				if (Math::Distance(this->GetGameObject()->GetTransform().position, temp->GetTransform().position) < GetRadius(temp))
 				{
 					if (CheckCollision(temp) == true)
 					{
@@ -81,40 +86,120 @@ void Collision::Cleanup(void)
 
 }
 
-bool Collision::CheckCollision(Gameobject* gb)
+real Collision::GetRadius(Gameobject* gb)
 {
-	Math::Vec3 A_minPosition = GetBoxPosition(this->GetGameObject(), fColorRGBA{ -1, -1, 0, 1.0f });
-	Math::Vec3 A_maxPosition = GetBoxPosition(this->GetGameObject(), fColorRGBA{ 1, 1, 0, 1.0f });
+	Math::Vec3 atempVec1 = Math::Vec3{ this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).x, this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).y, 0.0f };
+	real aradius1 = Math::Distance(this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), atempVec1);
+	aradius1 = aradius1;
+	Math::Vec3 atempVec2 = Math::Vec3{ this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).x, this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).y, 0.0f };
+	real aradius2 = Math::Distance(this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), atempVec2);
+	aradius2 = aradius2;
 
-	Math::Vec3 B_minPosition = GetBoxPosition(gb, fColorRGBA{ -1, -1, 0, 1.0f });
-	Math::Vec3 B_maxPosition = GetBoxPosition(gb, fColorRGBA{ 1, 1, 0, 1.0f });
+	Math::Vec3 btempVec1 = Math::Vec3{ gb->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).x, gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).y, 0.0f };
+	real bradius1 = Math::Distance(gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), btempVec1);
+	bradius1 = bradius1;
+	Math::Vec3 btempVec2 = Math::Vec3{ gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).x, gb->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).y, 0.0f };
+	real bradius2 = Math::Distance(gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), btempVec2);
+	bradius2 = bradius2;
 
-	if (B_minPosition.x - A_maxPosition.x > 0) return false;
-	if (A_minPosition.x - B_maxPosition.x > 0) return false;
-	if (B_minPosition.y - A_maxPosition.y > 0) return false;
-	if (A_minPosition.y - B_maxPosition.y > 0) return false;
+	real radius1, radius2;
+
+	if (aradius1 >= aradius2)
+		radius1 = aradius1;
+	else
+		radius1 = aradius2;
+
+	if (bradius1 >= bradius2)
+		radius2 = bradius1;
+	else
+		radius2 = bradius2;
+
+	return radius1 + radius2;
+}
+
+Math::Vec3 Collision::GetAxis(Math::Vec3 point1, Math::Vec3 point2)
+{
+	Math::Vec3 edge = point1 - point2;
+	Math::Vec3 edgeNormal = Math::Vec3{ -edge.y, edge.x, edge.z };
+	Math::Normalize(edgeNormal);
+	return edgeNormal;
+}
+
+bool Collision::isProjectionIntersecting(Math::Vec3 aCorners[], Math::Vec3 bCorners[], Math::Vec3 axis)
+{
+	real aMin, aMax, bMin, bMax;
+
+	GetMinMaxOfProjection(aCorners, axis, aMin, aMax);
+	GetMinMaxOfProjection(bCorners, axis, bMin, bMax);
+
+	if (aMin > bMax) return false;
+	if (aMax < bMin) return false;
 
 	return true;
 }
 
-Math::Vec3 Collision::GetBoxPosition(Gameobject* gb, fColorRGBA pos)
+void Collision::GetMinMaxOfProjection(Math::Vec3 corners[], Math::Vec3 axis, real& min, real& max)
 {
-	Math::Mat4x4 mvp = Application::GetInstancePtr()->GetRenderer()->GetCamera()->GetVP() * gb->GetModelMatrix();
+	min = 0.018736723663f;
+	max = 0.018736723663f;
 
-	fColorRGBA temp2 =
+	for (int i = 0; i < 4; i++)
 	{
-		mvp.m11 * pos.r + mvp.m12 * pos.g + mvp.m13 * pos.b + mvp.m14 * pos.a,
-		mvp.m21 * pos.r + mvp.m22 * pos.g + mvp.m23 * pos.b + mvp.m24 * pos.a,
-		mvp.m31 * pos.r + mvp.m32 * pos.g + mvp.m33 * pos.b + mvp.m34 * pos.a,
-		mvp.m41 * pos.r + mvp.m42 * pos.g + mvp.m43 * pos.b + mvp.m44 * pos.a,
+		Math::Vec3 point = corners[i];
+
+		real value = ((point.x * axis.x) + (point.y * axis.y)) / ((axis.x * axis.x) + (axis.y * axis.y));
+
+		point = Math::Vec3{value * axis.x, value * axis.y, 0.0f};
+
+		real projection = Math::Dot(point, axis);
+
+		if (min == 0.018736723663f)
+		{
+			min = projection;
+			max = projection;
+		}
+		else
+		{
+			if (projection < min)
+				min = projection;
+
+			if (projection > max)
+				max = projection;
+		}
+	}
+}
+
+bool Collision::CheckCollision(Gameobject* gb)
+{
+	Math::Vec3 aCorners[4] =
+	{
+		this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }),
+		this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }),
+		this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }),
+		this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, -1, 0, 1.0f }),
 	};
 
-	return Math::Vec3
+	Math::Vec3 bCorners[4] =
 	{
-		gb->GetTransform().position.x + temp2.r * 100.0f,
-		gb->GetTransform().position.y + temp2.g * 100.0f,
-		0.0f,
+		gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }),
+		gb->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }),
+		gb->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }),
+		gb->GetWorldCorner(fColorRGBA{ 1, -1, 0, 1.0f }),
 	};
+
+	Math::Vec3 axis1 = GetAxis(aCorners[0], aCorners[1]);
+	if (!this->isProjectionIntersecting(aCorners, bCorners, axis1)) return false;
+
+	Math::Vec3 axis2 = GetAxis(aCorners[0], aCorners[3]);
+	if (!this->isProjectionIntersecting(aCorners, bCorners, axis2)) return false;
+
+	Math::Vec3 axis3 = GetAxis(bCorners[1], bCorners[2]);
+	if (!this->isProjectionIntersecting(aCorners, bCorners, axis3)) return false;
+
+	Math::Vec3 axis4 = GetAxis(bCorners[1], bCorners[0]);
+	if (!this->isProjectionIntersecting(aCorners, bCorners, axis4)) return false;
+
+	return true;
 }
 
 

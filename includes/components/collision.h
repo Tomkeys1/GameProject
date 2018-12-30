@@ -19,10 +19,15 @@ public:
 	virtual void Update(void) override;
 	virtual void Cleanup(void) override;
 
-	bool CheckCollision(Gameobject* gb);
-	Math::Vec3 GetBoxPosition(Gameobject* gb, fColorRGBA pos);
-
 private:
+	real GetRadius(Gameobject* gb);
+
+	Math::Vec3 GetAxis(Math::Vec3 point1, Math::Vec3 point2);
+	bool isProjectionIntersecting(Math::Vec3 aCorners[], Math::Vec3 bCorners[], Math::Vec3 normal);
+	void GetMinMaxOfProjection(Math::Vec3 corners[], Math::Vec3 axis, real& min, real& max);
+
+
+	bool CheckCollision(Gameobject* gb);
 
 	real collisionRange = 40;
 };

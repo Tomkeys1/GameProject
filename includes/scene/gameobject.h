@@ -7,6 +7,7 @@
 #include "typedefs/transform.h"
 #include "typedefs/utils.h"
 #include "math/mat4x4.h"
+#include "typedefs/components.h"
 
 //Forward declaration.
 class Component;
@@ -58,9 +59,14 @@ public:
 	bool isVisisble(void);
 
 	const char* GetName(void);
+	real GetRadius(void);
+	Math::Mat4x4 GetModelMatrix(void);
+	Math::Mat4x4 GetModelMatrixNoRotation(void);
+	Math::Mat4x4 GetModelMatrixInvertRotation(void);
+	Math::Vec3 GetWorldCorner(fColorRGBA corner);
+	Math::Vec3 GetWorldCorner(fColorRGBA corner, Math::Mat4x4 matrix);
 	Math::Vec3& GetEulerRotation(void);
 	Math::Quaternion GetRotation(void);
-	Math::Mat4x4 GetModelMatrix(void);
 	Transform& GetTransform(void);
 	Geometry* GetMesh(void);
 	Shader* GetMaterial(void);
@@ -68,6 +74,7 @@ public:
 
 //Declare private variables.
 private:
+
 	Gameobject* hitObject;
 	Geometry* mesh;
 	Shader* material;

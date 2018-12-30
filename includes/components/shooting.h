@@ -16,6 +16,8 @@ public:
 	virtual void Cleanup(void) override;
 
 private:
+	Math::Vec3 GetPos(Gameobject* gb);
+
 	real speed;
 	real growth;
 	real time;

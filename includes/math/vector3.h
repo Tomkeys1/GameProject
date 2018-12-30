@@ -168,7 +168,7 @@ namespace Math
 	//Get square length with pythagoras without the square root.
 	inline float SquareLength(const Vec3& vec)
 	{
-		return (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
+		return (vec.x * vec.x) + (vec.y * vec.y);
 	}
 
 	//Get square length with pythagoras.
@@ -180,7 +180,7 @@ namespace Math
 	//Get distance between two vector3. 
 	inline float Distance(const Vec3& lhs, const Vec3& rhs)
 	{
-		return Length(lhs) - Length(rhs);
+		return sqrt(((rhs.x - lhs.x) * (rhs.x - lhs.x)) + ((rhs.y - lhs.y) * (rhs.y - lhs.y)));
 	}
 
 	//Normalize vector2.

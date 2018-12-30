@@ -25,7 +25,10 @@ void Movement::Update(void)
 	Component::Update();
 
 	Rotate();
-	Move();
+
+	if (!this->GetGameObject()->isColliding() || this->GetGameObject()->GetHitObject()->isTrigger())
+		Move();
+	
 }
 
 void Movement::Cleanup(void)
