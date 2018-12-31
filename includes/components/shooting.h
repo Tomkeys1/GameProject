@@ -15,14 +15,9 @@ public:
 	virtual void Update(void) override;
 	virtual void Cleanup(void) override;
 
+	ShootingValues& GetShootingValues(void);
 private:
 	Math::Vec3 GetPos(Gameobject* gb);
 
-	real speed;
-	real growth;
-	real time;
-
-	bool shot;
-
-
+	ShootingValues shoot;
 };

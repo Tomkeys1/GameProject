@@ -37,6 +37,8 @@ public:
 
 //Declare private variables
 private:
+	const int FRAMES_PER_SECOND = 144;
+	const int SKIP_TICKS = 1000 / FRAMES_PER_SECOND;
 	bool running = true;
 
 	Scene* scene;

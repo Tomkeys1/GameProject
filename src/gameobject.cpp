@@ -2,6 +2,7 @@
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
 #include "application.h"
+#include "scene/scene.h"
 #include "scene/gameobject.h"
 #include "components/movement.h"
 #include "components/shooting.h"
@@ -11,6 +12,8 @@
 #include "rendering/geometry.h"
 #include "rendering/shader.h"
 #include "rendering/camera.h"
+#include "physics/rigidbody.h"
+#include "components/health.h"
 
 //Gameobject Constructor.
 Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, fColorRGBA col, bool hasCollision)
@@ -22,6 +25,7 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 	this->eulerRotation = { 0, 0, 0 };
 
 	this->collision = hasCollision;
+	this->tag = "";
 	this->hitObject = nullptr;
 
 	if (cam)
@@ -43,6 +47,14 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 		this->SetParent(parent);
 		parent->AddChild(this);
 	}
+
+	this->rigidbody = new Rigidbody(this);
+	this->rigidbody->GetRigidbodyValues().mass = 100.0f;
+	this->rigidbody->GetRigidbodyValues().isEnabled = false;
+	this->rigidbody->GetRigidbodyValues().isKinematic = false;
+	this->rigidbody->GetRigidbodyValues().dragCoefficient = 0.024f;
+	this->rigidbody->GetRigidbodyValues().airDensity = 1.20f;
+	this->rigidbody->GetRigidbodyValues().gravityDir = Math::Vec3::neg_unit_y;
 }
 
 Gameobject::Gameobject(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, fColorRGBA col, bool render, bool isRoot, Gameobject* parent)
@@ -56,10 +68,12 @@ Gameobject::~Gameobject()
 }
 
 //Void Update
-void Gameobject::Update(void)
+void Gameobject::Update()
 {
 	//Execute the bases Update.
 	Node::Update();
+
+	this->rigidbody->Update();
 
 	//For all component pointers in the components list of this gameobject.
 	for (Component* component : this->components)  
@@ -68,17 +82,20 @@ void Gameobject::Update(void)
 		//Update the casted components.
 		switch (component->GetType()) 
 		{
+			case ComponentType::Collision:
+				(reinterpret_cast<Collision*>(component))->Update();
+				break;
+			case ComponentType::Movement :
+				(reinterpret_cast<Movement*>(component))->Update();
+				break;
 			case ComponentType::Bullet:
 				(reinterpret_cast<Bullet*>(component))->Update();
 				break;
 			case ComponentType::Shoot:
 				(reinterpret_cast<Shooting*>(component))->Update();
 				break;
-			case ComponentType::Collision:
-				(reinterpret_cast<Collision*>(component))->Update();
-				break;
-			case ComponentType::Movement :
-				(reinterpret_cast<Movement*>(component))->Update();
+			case ComponentType::Health:
+				(reinterpret_cast<Health*>(component))->Update();
 				break;
 		}
 	}
@@ -87,9 +104,9 @@ void Gameobject::Update(void)
 //Void Cleanup
 void Gameobject::Cleanup(void)
 {
-
 	//Empty this gameobjects name.
 	this->name = "";
+	SAFE_DELETE(this->rigidbody)
 
 	for (Component* component : this->components)
 	{
@@ -97,6 +114,9 @@ void Gameobject::Cleanup(void)
 		//Update the casted components.
 		switch (component->GetType())
 		{
+		case ComponentType::Collision:
+			(reinterpret_cast<Collision*>(component))->Cleanup();
+			break;
 		case ComponentType::Movement:
 			(reinterpret_cast<Movement*>(component))->Cleanup();
 			break;
@@ -106,8 +126,8 @@ void Gameobject::Cleanup(void)
 		case ComponentType::Bullet:
 			(reinterpret_cast<Bullet*>(component))->Cleanup();
 			break;
-		case ComponentType::Collision:
-			(reinterpret_cast<Collision*>(component))->Cleanup();
+		case ComponentType::Health:
+			(reinterpret_cast<Health*>(component))->Cleanup();
 			break;
 		}
 
@@ -151,9 +171,14 @@ void Gameobject::SetMeshData(Vertex* vertices, ui32* indicies, ui32 vLength, ui3
 	this->bMesh = true;
 }
 
-const char* Gameobject::GetName(void)
+std::string Gameobject::GetName(void)
 {
 	return this->name;
+}
+
+std::string  Gameobject::GetTag(void)
+{
+	return this->tag;
 }
 
 Math::Vec3 Gameobject::GetWorldCorner(fColorRGBA corner)
@@ -258,11 +283,21 @@ Gameobject * Gameobject::GetHitObject(void)
 	return this->hitObject;
 }
 
+Rigidbody* Gameobject::GetRigidbody(void)
+{
+	return this->rigidbody;
+}
+
 //Set name
-void Gameobject::SetName(const char* gameobjectName)
+void Gameobject::SetName(std::string gameobjectName)
 {
 	//Set this gameobjects name.
 	this->name = gameobjectName;
+}
+
+void Gameobject::SetTag(std::string tag)
+{
+	this->tag = tag;
 }
 
 void Gameobject::SetVisiblity(bool b)

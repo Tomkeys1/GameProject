@@ -15,14 +15,13 @@ public:
 	virtual void Update(void) override;
 	virtual void Cleanup(void) override;
 
-	real velocity;
-	real maxSpeed;
+	MovementValues& GetMovementValues(void);
+
 private:
 	void Move();
 	void Rotate(void);
 	
-	real speed;
 	bool horizontal;
-	Math::Vec3 direction;
+	MovementValues movement;
 
 };

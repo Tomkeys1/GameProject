@@ -22,6 +22,7 @@ public:
 
 	virtual void AddChild(Node* node);
 	virtual std::list<Node*> GetAllChildren();
+	virtual std::list<Node*>& GetChildren();
 	virtual void ListAllChildren(std::list<Node*>& list);
 
 	virtual bool hasChildren();

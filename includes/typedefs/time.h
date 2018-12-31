@@ -1,7 +1,9 @@
 
 #pragma once
 
-namespace Time
+
+struct Time
 {
-	static float deltaTime;
+public:
+	inline static float deltaTime = 0.0f;
 };

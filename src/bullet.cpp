@@ -1,8 +1,13 @@
 //EXTERNAL INCLUDES
+#include <chrono>
+#include <iostream>
 //INTERNAL INCLUDES
 #include "components/bullet.h"
+#include "physics/rigidbody.h"
 #include "typedefs/utils.h"
 #include "scene/gameobject.h"
+#include "scene/scene.h"
+#include "application.h"
 
 Bullet::Bullet()
 {
@@ -21,15 +26,25 @@ void Bullet::Update(void)
 	//Execute the components Update function.
 	Component::Update();
 
-	if (this->time > 0.0f)
+
+	if (this->bullet.time > 0.0f)
 	{
-		this->GetGameObject()->GetTransform().position += this->dir * this->speed;
-		this->time -= 0.0008f;
+		if (this->GetGameObject()->GetHitObject() != nullptr)
+		{
+			if (this->GetGameObject()->GetHitObject() == reinterpret_cast<Gameobject*>(this->GetGameObject()->GetParent()))
+				this->GetGameObject()->GetRigidbody()->AddForce(this->bullet.dir, this->bullet.speed);
+		}
+		else
+		{
+			this->GetGameObject()->GetRigidbody()->AddForce(this->bullet.dir, this->bullet.speed);
+		}
+		this->bullet.time -= 2.0f * Time::deltaTime;
 	}
 	else
 	{
-		this->GetGameObject()->Cleanup();
+		Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject());
 	}
+
 }
 
 void Bullet::Cleanup(void)
@@ -37,9 +52,7 @@ void Bullet::Cleanup(void)
 	Component::Cleanup();
 }
 
-void Bullet::SetBulletValues(real speed, real time, Math::Vec3 direction)
+BulletValues& Bullet::GetBulletValues(void)
 {
-	this->time = time;
-	this->speed = speed;
-	this->dir = direction;
+	return this->bullet;
 }

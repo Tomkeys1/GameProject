@@ -33,13 +33,15 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 //Void Updatea
 void Application::Update(void)
 {
-	real previous = GetCurrentTime();
+	DWORD prev_frame_tick;
+	DWORD curr_frame_tick = GetTickCount64();
 
 	//Do loop.
 	do
 	{
-		real current = GetCurrentTime();
-		real elapsed = current - previous;
+
+		prev_frame_tick = curr_frame_tick;
+		curr_frame_tick = GetTickCount64();
 
 		// Input Handling
 		Window::GetInstancePtr()->DispatchMessages();
@@ -47,8 +49,7 @@ void Application::Update(void)
 			break;
 
 		// Update Gamestate
-		Time::deltaTime = elapsed;
-		this->scene->Update();
+		this->scene->Update(curr_frame_tick - prev_frame_tick);
 
 		if (Input::GetInstancePtr()->GetUpState())
 			Input::GetInstancePtr()->EradicateUpKeys();
@@ -56,7 +57,7 @@ void Application::Update(void)
 		// Render Gamestate
 		Application::renderer->Render();
 
-		previous = current;
+		this->scene->DeleteGameobjects();
 
 	} while (running);
 }

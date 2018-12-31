@@ -138,8 +138,9 @@ void Renderer::Render(void)
 
 	Math::Mat4x4 vp = this->camera->GetVP();
 
-	for (Gameobject* gb : this->gameObjects)
+	for (Node* node : Application::GetInstancePtr()->GetScene()->GetGameobject()->GetAllChildren())
 	{
+		Gameobject* gb = reinterpret_cast<Gameobject*>(node);
 		if (gb->hasMesh() && gb->isVisisble())
 		{
 			gb->GetMesh()->Render(devcon);

@@ -88,19 +88,15 @@ void Collision::Cleanup(void)
 
 real Collision::GetRadius(Gameobject* gb)
 {
-	Math::Vec3 atempVec1 = Math::Vec3{ this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).x, this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).y, 0.0f };
-	real aradius1 = Math::Distance(this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), atempVec1);
-	aradius1 = aradius1;
-	Math::Vec3 atempVec2 = Math::Vec3{ this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).x, this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).y, 0.0f };
-	real aradius2 = Math::Distance(this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), atempVec2);
-	aradius2 = aradius2;
+	real aradius1 = Math::Distance(this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()));
+	aradius1 = aradius1 * 0.5f;
+	real aradius2 = Math::Distance(this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()));
+	aradius2 = aradius2 * 0.5f;
 
-	Math::Vec3 btempVec1 = Math::Vec3{ gb->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).x, gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).y, 0.0f };
-	real bradius1 = Math::Distance(gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), btempVec1);
-	bradius1 = bradius1;
-	Math::Vec3 btempVec2 = Math::Vec3{ gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).x, gb->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()).y, 0.0f };
-	real bradius2 = Math::Distance(gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), btempVec2);
-	bradius2 = bradius2;
+	real bradius1 = Math::Distance(gb->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }, gb->GetModelMatrixNoRotation()), gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, gb->GetModelMatrixNoRotation()));
+	bradius1 = bradius1 * 0.5f;
+	real bradius2 = Math::Distance(gb->GetWorldCorner(fColorRGBA{ 1, -1, 0, 1.0f }, gb->GetModelMatrixNoRotation()), gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, gb->GetModelMatrixNoRotation()));
+	bradius2 = bradius2 * 0.5f;
 
 	real radius1, radius2;
 

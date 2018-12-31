@@ -93,12 +93,20 @@ std::list<Node*> Node::GetAllChildren()
 	return temp;
 }
 
+std::list<Node*>& Node::GetChildren()
+{
+	return this->children;
+}
+
 void Node::ListAllChildren(std::list<Node*>& list)
 {
 	for (Node* node : this->children)
 	{
 		//Recursive function to open all children in all childs of this node.
-		node->ListAllChildren(list);
+		if (node != nullptr)
+		{
+			node->ListAllChildren(list);
+		}
 	}
 
 	if(this->parent)
@@ -146,23 +154,13 @@ Node* Node::GetRoot()
 }
 
 //Void Update
-void Node::Update(void)
+void Node::Update()
 {
-
 	//For every child in this nodes children list
 	for (Node* child : this->children) 
 	{
 		//Execute its Update function.
 		child->Update();
-	}
-
-	if (this->deletedObjects.size() != 0)
-	{
-		for (Node* node : this->deletedObjects)
-		{
-			this->children.remove(node);
-		}
-		this->deletedObjects.clear();
 	}
 }
 

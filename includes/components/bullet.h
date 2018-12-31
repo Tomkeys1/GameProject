@@ -13,12 +13,8 @@ public:
 	void Initialize(Gameobject* gb);
 	virtual void Update(void) override;
 	virtual void Cleanup(void) override;
-	void SetBulletValues(real speed, real time, Math::Vec3 direction);
+	BulletValues& GetBulletValues(void);
 
 private:
-	real speed;
-	real time;
-	Math::Vec3 dir;
-
-
+	BulletValues bullet;
 };

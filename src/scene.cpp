@@ -2,15 +2,18 @@
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
 #include "scene/scene.h"
+#include "components/health.h"
 #include "application.h"
 #include "rendering/renderer.h"
 #include "typedefs/color.h"
+#include "typedefs/time.h"
 #include "components/component.h"
 #include "components/movement.h"
 #include "components/collision.h"
 #include "components/shooting.h"
 #include "components/bullet.h"
 #include "rendering/camera.h"
+#include "physics/rigidbody.h"
 
 Scene::Scene()
 {
@@ -26,23 +29,37 @@ void Scene::Initialize(void)
 
 	Movement* mov = new Movement;
 	Shooting* shot = new Shooting;
-	Collision* col = new Collision;
+	Collision* playerCol = new Collision;
 
 	AddComponent(this->gameObjects["player1"], mov);
 	AddComponent(this->gameObjects["player1"], shot);
-	AddComponent(this->gameObjects["player1"], col);
+	AddComponent(this->gameObjects["player1"], playerCol);
 
-	mov->velocity = 0.00001f;
-	mov->maxSpeed = 0.01f;
+	mov->GetMovementValues().velocity = 10.0f;
+	mov->GetMovementValues().maxSpeed = 1000.0f;
+	mov->GetMovementValues().rotationSpeed = 80.0f;
+
+	shot->GetShootingValues().growth = 0.4f;
+	shot->GetShootingValues().time = 1.0f;
+	shot->GetShootingValues().speed = 0.0f;
 
 	this->gameObjects["player1"]->GetTransform().position = { 0, -70.0f, 0.0f };
 	this->gameObjects["player1"]->GetTransform().scaling = { 0.2f, 0.4f, 0 };
+	this->gameObjects["player1"]->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
+	this->gameObjects["player1"]->GetRigidbody()->GetRigidbodyValues().mass = 100.0f;
 
 
 	AddGameobject("object1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::RED));
+	Health* health = new Health;
+	Collision* object1Col = new Collision;
+	AddComponent(this->gameObjects["object1"], object1Col);
+	AddComponent(this->gameObjects["object1"], health);
 
-	this->gameObjects["object1"]->GetTransform().position = { 0, 0.0f, 0.0f };
-	this->gameObjects["object1"]->SetIsTrigger(true);
+	this->gameObjects["object1"]->GetTransform().position = { 30, 70.0f, 0.0f };
+
+	AddGameobject("ground", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::GREEN));
+	this->gameObjects["ground"]->GetTransform().position = { 0, -100, 0.0f };
+	this->gameObjects["ground"]->GetTransform().scaling = { 100.0f, 0.50f, 0 };
 }
 
 void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent, fColorRGBA color)
@@ -91,7 +108,7 @@ void Scene::AddComponent(Gameobject* gb, Component* com)
 		(reinterpret_cast<Movement*>(com))->Initialize(gb);
 		break;
 	case ComponentType::Shoot:
-		(reinterpret_cast<Movement*>(com))->Initialize(gb);
+		(reinterpret_cast<Shooting*>(com))->Initialize(gb);
 		break;
 	case ComponentType::Bullet:
 		(reinterpret_cast<Bullet*>(com))->Initialize(gb);
@@ -99,9 +116,31 @@ void Scene::AddComponent(Gameobject* gb, Component* com)
 	case ComponentType::Collision:
 		(reinterpret_cast<Collision*>(com))->Initialize(gb);
 		break;
+	case ComponentType::Health:
+		(reinterpret_cast<Health*>(com))->Initialize(gb);
+		break;
 	}
 
 	gb->AddComponent(com);
+}
+
+void Scene::DeleteGameobject(Gameobject* gb)
+{
+	this->deleteGb.push_back(gb);
+}
+
+void Scene::DeleteGameobjects(void)
+{
+	if (this->deleteGb.size() != 0)
+	{
+		for (Gameobject* gb : this->deleteGb)
+		{
+			this->gameObjects[gb->GetName()]->GetParent()->GetChildren().remove(gb);
+			this->gameObjects.erase(gb->GetName());
+			gb->Cleanup();
+		}
+		this->deleteGb.clear();
+	}
 }
 
 Gameobject* Scene::GetGameobject(std::string name)
@@ -114,8 +153,9 @@ Gameobject* Scene::GetGameobject()
 	return this->root;
 }
 
-void Scene::Update(void)
+void Scene::Update(real deltaTime)
 {
+	Time::deltaTime = deltaTime / 1000.0f;
 	this->root->Update();
 }
 

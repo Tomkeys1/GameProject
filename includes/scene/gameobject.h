@@ -8,9 +8,11 @@
 #include "typedefs/utils.h"
 #include "math/mat4x4.h"
 #include "typedefs/components.h"
+#include "typedefs/time.h"
 
 //Forward declaration.
 class Component;
+class Rigidbody;
 class Geometry;
 class Shader;
 
@@ -44,7 +46,8 @@ public:
 	void DeleteComponent(Component* component);
 
 	void SetMeshData(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength);
-	void SetName(const char* gameobjectName);
+	void SetName(std::string gameobjectName);
+	void SetTag(std::string tag);
 	void SetVisiblity(bool b);
 	void SetVisi(bool b);
 	void SetCollision(bool b);
@@ -58,8 +61,8 @@ public:
 	bool isTrigger(void);
 	bool isVisisble(void);
 
-	const char* GetName(void);
-	real GetRadius(void);
+	std::string GetName(void);
+	std::string GetTag(void);
 	Math::Mat4x4 GetModelMatrix(void);
 	Math::Mat4x4 GetModelMatrixNoRotation(void);
 	Math::Mat4x4 GetModelMatrixInvertRotation(void);
@@ -71,10 +74,11 @@ public:
 	Geometry* GetMesh(void);
 	Shader* GetMaterial(void);
 	Gameobject* GetHitObject(void);
+	Rigidbody* GetRigidbody(void);
 
 //Declare private variables.
 private:
-
+	Rigidbody* rigidbody;
 	Gameobject* hitObject;
 	Geometry* mesh;
 	Shader* material;
@@ -85,7 +89,8 @@ private:
 
 	std::vector<Component*> components;
 
-	const char* name;
+	std::string name;
+	std::string tag; 
 	bool bMesh;
 	bool collision;
 	bool is_colliding =  false;
