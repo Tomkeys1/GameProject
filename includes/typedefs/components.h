@@ -7,7 +7,8 @@ enum class ComponentType
 	Shoot = 1,
 	Bullet = 2,
 	Collision = 3,
-	Health = 4
+	Health = 4,
+	GravityShot = 5
 };
 
 struct MovementValues
@@ -29,8 +30,10 @@ struct BulletValues
 
 struct ShootingValues
 {
+	ui64 shotID;
 	bool available;
 	real timer;
+	real cooldown;
 	real speed;
 	real growth;
 	real time;
@@ -46,8 +49,10 @@ struct RigidbodyValues
 	real airDensity;
 	real dragCoefficient;
 	real areaOfObject;
+	real velocity;
 
 	Math::Vec3 gravityDir;
+	Math::Vec3 movementDir;
 };
 
 struct HealthValues
@@ -57,4 +62,24 @@ struct HealthValues
 	real health;
 	real damage;
 	real resistance;
+};
+
+
+struct RaycastInfo
+{
+	real distance;
+	Math::Vec3 hitPosition;
+	Math::Vec3 hitNormal;
+};
+
+struct GravityShotValues
+{
+	real timeInAir;
+	real gravityRadius;
+	real pullSpeed;
+	real cooldown;
+	real timeToExplode;
+
+	Math::Vec3 direction;
+	Math::Vec3 gravityDirection;
 };

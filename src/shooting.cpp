@@ -5,7 +5,6 @@
 #include "systems/inputhandler.h"
 #include "typedefs/color.h"
 #include "components/shooting.h"
-#include "components/collision.h"
 #include "components/bullet.h"
 #include "typedefs/utils.h"
 #include "scene/gameobject.h"
@@ -17,7 +16,9 @@ Shooting::Shooting()
 {
 	Component::Initialize("shooting", ComponentType::Shoot);
 	this->shoot.available = true;
-	this->shoot.timer = 1.0f;
+	this->shoot.timer = 0.0f;
+	this->shoot.cooldown = 0.0f;
+	this->shoot.shotID = 0;
 }
 
 //Void Initialize
@@ -48,7 +49,7 @@ void Shooting::Update(void)
 	if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Space) && this->shoot.available)
 	{
 		this->shoot.available = false;
-		this->shoot.timer = 1.7f;
+		this->shoot.timer = this->shoot.cooldown;
 
 		if (this->GetGameObject()->isVisisble())
 		{
@@ -57,7 +58,8 @@ void Shooting::Update(void)
 
  			std::string tempStr = this->GetGameObject()->GetName();
 			tempStr += " shot";
-			Application::GetInstancePtr()->GetScene()->AddGameobject(tempStr.c_str(), CreateMode::NORMAL, this->GetGameObject(), Color::GetColor(ColorCode::BLUE));
+			tempStr += this->shoot.shotID;
+			Application::GetInstancePtr()->GetScene()->AddGameobject(tempStr.c_str(), CreateMode::NORMAL, this->GetGameObject(), Color::GetColor(ColorCode::BLUE), true);
 			Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetGameobject(tempStr.c_str());
 			temp->GetTransform().scaling = { 0.05f, 0.15f, 0 };
 			temp->GetTransform().position = GetPos(temp);
@@ -75,9 +77,7 @@ void Shooting::Update(void)
 			bullet->GetBulletValues().time = this->shoot.time;
 
 			this->shoot.speed = 20.0f;
-
-			Collision* col = new Collision;
-			Application::GetInstancePtr()->GetScene()->AddComponent(temp, col);
+			this->shoot.shotID++;
 
 
 			auto end = chrono::steady_clock::now();
@@ -86,6 +86,11 @@ void Shooting::Update(void)
 				<< chrono::duration_cast<chrono::milliseconds>(end - start).count()
 				<< " ms" << endl;
 		}
+	}
+
+	if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Q))
+	{
+
 	}
 }
 

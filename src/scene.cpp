@@ -8,8 +8,8 @@
 #include "typedefs/color.h"
 #include "typedefs/time.h"
 #include "components/component.h"
+#include "components/abilities/gravityshot.h"
 #include "components/movement.h"
-#include "components/collision.h"
 #include "components/shooting.h"
 #include "components/bullet.h"
 #include "rendering/camera.h"
@@ -25,22 +25,20 @@ Scene::Scene()
 
 void Scene::Initialize(void)
 {
-	AddGameobject("player1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::YELLOW));
+	AddGameobject("player1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::YELLOW), true);
 
 	Movement* mov = new Movement;
 	Shooting* shot = new Shooting;
-	Collision* playerCol = new Collision;
 
 	AddComponent(this->gameObjects["player1"], mov);
 	AddComponent(this->gameObjects["player1"], shot);
-	AddComponent(this->gameObjects["player1"], playerCol);
 
-	mov->GetMovementValues().velocity = 10.0f;
-	mov->GetMovementValues().maxSpeed = 1000.0f;
+	mov->GetMovementValues().speed = 10.0f;
+	mov->GetMovementValues().maxSpeed = 10000.0f;
 	mov->GetMovementValues().rotationSpeed = 80.0f;
 
 	shot->GetShootingValues().growth = 0.4f;
-	shot->GetShootingValues().time = 1.0f;
+	shot->GetShootingValues().time = 3.0f;
 	shot->GetShootingValues().speed = 0.0f;
 
 	this->gameObjects["player1"]->GetTransform().position = { 0, -70.0f, 0.0f };
@@ -49,24 +47,28 @@ void Scene::Initialize(void)
 	this->gameObjects["player1"]->GetRigidbody()->GetRigidbodyValues().mass = 100.0f;
 
 
-	AddGameobject("object1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::RED));
-	Health* health = new Health;
-	Collision* object1Col = new Collision;
-	AddComponent(this->gameObjects["object1"], object1Col);
-	AddComponent(this->gameObjects["object1"], health);
+	AddGameobject("object1", CreateMode::NORMAL, this->GetGameobject("player1"), Color::GetColor(ColorCode::RED), true, true);
 
 	this->gameObjects["object1"]->GetTransform().position = { 30, 70.0f, 0.0f };
+	this->gameObjects["object1"]->GetTransform().scaling = { 1.0f, 1.0f, 0 };
 
-	AddGameobject("ground", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::GREEN));
+
+	AddGameobject("ground", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::GREEN), true, true);
 	this->gameObjects["ground"]->GetTransform().position = { 0, -100, 0.0f };
 	this->gameObjects["ground"]->GetTransform().scaling = { 100.0f, 0.50f, 0 };
+
+	AddGameobject("test", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::BLUE));
+	this->gameObjects["test"]->GetTransform().position = { 100, 100, 0.0f };
+	this->gameObjects["test"]->GetTransform().scaling = { 0.01f, 0.01f, 0 };
+
 }
 
-void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent, fColorRGBA color)
+
+void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent, fColorRGBA color, bool hasCollision, bool isMirror)
 {
 	if (mode == CreateMode::EMPTY)
 	{
-		this->gameObjects[name] = new Gameobject(false, false, false, parent, color, false);
+		this->gameObjects[name] = new Gameobject(false, false, false, parent, color, hasCollision, isMirror);
 		this->gameObjects[name]->SetName(name);
 
 		Application::GetInstancePtr()->AddGameobject(this->gameObjects[name]);
@@ -79,7 +81,7 @@ void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent,
 	}
 	else if (mode == CreateMode::NORMAL)
 	{
-		this->gameObjects[name] = new Gameobject(true, false, false, parent, color, true);
+		this->gameObjects[name] = new Gameobject(true, false, false, parent, color, hasCollision, isMirror);
 		this->gameObjects[name]->SetName(name);
 
 		Application::GetInstancePtr()->AddGameobject(this->gameObjects[name]);
@@ -113,11 +115,11 @@ void Scene::AddComponent(Gameobject* gb, Component* com)
 	case ComponentType::Bullet:
 		(reinterpret_cast<Bullet*>(com))->Initialize(gb);
 		break;
-	case ComponentType::Collision:
-		(reinterpret_cast<Collision*>(com))->Initialize(gb);
-		break;
 	case ComponentType::Health:
 		(reinterpret_cast<Health*>(com))->Initialize(gb);
+		break;
+	case ComponentType::GravityShot:
+		(reinterpret_cast<GravityShot*>(com))->Cleanup();
 		break;
 	}
 

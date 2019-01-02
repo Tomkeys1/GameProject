@@ -5,9 +5,9 @@
 #include "scene/scene.h"
 #include "scene/gameobject.h"
 #include "components/movement.h"
+#include "components/abilities/gravityshot.h"
 #include "components/shooting.h"
 #include "components/bullet.h"
-#include "components/collision.h"
 #include "rendering/renderer.h"
 #include "rendering/geometry.h"
 #include "rendering/shader.h"
@@ -16,7 +16,7 @@
 #include "components/health.h"
 
 //Gameobject Constructor.
-Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, fColorRGBA col, bool hasCollision)
+Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, fColorRGBA col, bool hasCollision, bool mirror)
 {
 	//Set this gameobjects position, scaling and rotation to 0;
 	this->transform.position = { 0, 0, 0 };
@@ -27,6 +27,7 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 	this->collision = hasCollision;
 	this->tag = "";
 	this->hitObject = nullptr;
+	this->isMirror = mirror;
 
 	if (cam)
 		return;
@@ -38,7 +39,7 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 		this->bMesh = true;
 	}
 	else
-	{
+	{	
 		this->bMesh = false;
 	}
 
@@ -55,11 +56,6 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 	this->rigidbody->GetRigidbodyValues().dragCoefficient = 0.024f;
 	this->rigidbody->GetRigidbodyValues().airDensity = 1.20f;
 	this->rigidbody->GetRigidbodyValues().gravityDir = Math::Vec3::neg_unit_y;
-}
-
-Gameobject::Gameobject(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, fColorRGBA col, bool render, bool isRoot, Gameobject* parent)
-{
-
 }
 
 Gameobject::~Gameobject()
@@ -82,9 +78,6 @@ void Gameobject::Update()
 		//Update the casted components.
 		switch (component->GetType()) 
 		{
-			case ComponentType::Collision:
-				(reinterpret_cast<Collision*>(component))->Update();
-				break;
 			case ComponentType::Movement :
 				(reinterpret_cast<Movement*>(component))->Update();
 				break;
@@ -96,6 +89,9 @@ void Gameobject::Update()
 				break;
 			case ComponentType::Health:
 				(reinterpret_cast<Health*>(component))->Update();
+				break;
+			case ComponentType::GravityShot:
+				(reinterpret_cast<GravityShot*>(component))->Update();
 				break;
 		}
 	}
@@ -114,9 +110,6 @@ void Gameobject::Cleanup(void)
 		//Update the casted components.
 		switch (component->GetType())
 		{
-		case ComponentType::Collision:
-			(reinterpret_cast<Collision*>(component))->Cleanup();
-			break;
 		case ComponentType::Movement:
 			(reinterpret_cast<Movement*>(component))->Cleanup();
 			break;
@@ -128,6 +121,9 @@ void Gameobject::Cleanup(void)
 			break;
 		case ComponentType::Health:
 			(reinterpret_cast<Health*>(component))->Cleanup();
+			break;
+		case ComponentType::GravityShot:
+			(reinterpret_cast<GravityShot*>(component))->Cleanup();
 			break;
 		}
 
@@ -185,13 +181,7 @@ Math::Vec3 Gameobject::GetWorldCorner(fColorRGBA corner)
 {
 	Math::Mat4x4 mvp = Application::GetInstancePtr()->GetRenderer()->GetCamera()->GetVP() * this->GetModelMatrixInvertRotation();
 
-	fColorRGBA temp2 =
-	{
-		mvp.m11 * corner.r + mvp.m12 * corner.g + mvp.m13 * corner.b + mvp.m14 * corner.a,
-		mvp.m21 * corner.r + mvp.m22 * corner.g + mvp.m23 * corner.b + mvp.m24 * corner.a,
-		mvp.m31 * corner.r + mvp.m32 * corner.g + mvp.m33 * corner.b + mvp.m34 * corner.a,
-		mvp.m41 * corner.r + mvp.m42 * corner.g + mvp.m43 * corner.b + mvp.m44 * corner.a,
-	};
+	fColorRGBA temp2 = corner * mvp;
 
 	return Math::Vec3
 	{
@@ -205,13 +195,7 @@ Math::Vec3 Gameobject::GetWorldCorner(fColorRGBA corner, Math::Mat4x4 matrix)
 {
 	Math::Mat4x4 mvp = Application::GetInstancePtr()->GetRenderer()->GetCamera()->GetVP() * matrix;
 
-	fColorRGBA temp2 =
-	{
-		mvp.m11 * corner.r + mvp.m12 * corner.g + mvp.m13 * corner.b + mvp.m14 * corner.a,
-		mvp.m21 * corner.r + mvp.m22 * corner.g + mvp.m23 * corner.b + mvp.m24 * corner.a,
-		mvp.m31 * corner.r + mvp.m32 * corner.g + mvp.m33 * corner.b + mvp.m34 * corner.a,
-		mvp.m41 * corner.r + mvp.m42 * corner.g + mvp.m43 * corner.b + mvp.m44 * corner.a,
-	};
+	fColorRGBA temp2 = corner * mvp;
 
 	return Math::Vec3
 	{
@@ -229,6 +213,16 @@ Math::Vec3& Gameobject::GetEulerRotation(void)
 Math::Quaternion Gameobject::GetRotation(void)
 {
 	return this->transform.rotation;
+}
+
+Component* Gameobject::GetComponent(ComponentType type)
+{
+	for (Component* component : this->components)
+	{
+		if (component->GetType() == type)
+			return component;
+	}
+	return nullptr;
 }
 
 Math::Mat4x4 Gameobject::GetModelMatrix(void)
@@ -352,6 +346,11 @@ bool Gameobject::isColliding()
 	return this->is_colliding;
 }
 
+bool Gameobject::IsMirror(void)
+{
+	return this->isMirror;
+}
+
 bool Gameobject::isTrigger(void)
 {
 	return this->is_trigger;
@@ -362,4 +361,27 @@ bool Gameobject::isVisisble(void)
 	if (this->isRendering == true)
 		return true;
 	return false;
+}
+
+bool Gameobject::inViewport(void)
+{
+	Math::Vec3 corners[4] =
+	{
+		this->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }),
+		this->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }),
+		this->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }),
+		this->GetWorldCorner(fColorRGBA{ 1, -1, 0, 1.0f }),
+	};
+
+	real xMin, xMax, yMin, yMax;
+
+	Math::GetMinMaxOfProjection(corners, Math::Vec3::unit_x, xMin, xMax);
+	Math::GetMinMaxOfProjection(corners, Math::Vec3::unit_y, yMin, yMax);
+
+	if (xMin > 100.0f) return false;
+	if (xMax < -100.0f) return false;
+	if (yMin > 100.0f) return false;
+	if (yMax < -100.0f) return false;
+
+	return true;
 }

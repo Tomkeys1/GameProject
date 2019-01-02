@@ -5,92 +5,95 @@
 #include "scene/gameobject.h"
 #include "scene/scene.h"
 #include "systems/inputhandler.h"
-#include "components/collision.h"
+#include "physics/collision.h"
+#include "physics/rigidbody.h"
 #include "typedefs/utils.h"
 #include "rendering/camera.h"
 #include "rendering/renderer.h"
 
 
-Collision::Collision()
+Collision::Collision(Gameobject* gb)
 {
-	Component::Initialize("collision", ComponentType::Collision);
-}
-
-//Void Initialize
-void Collision::Initialize(Gameobject* gb)
-{
-	//Initialize the base.
-	Component::SetGameObject(gb);
+	this->gameobject = gb;
 }
 
 void Collision::Update(void)
 {
 	//Execute the components Update function.
-	Component::Update();
 
 	if (Input::GetInstancePtr()->GetKey(KeyCode::B))
 	{
 		real f = 0.01f;
 	}
 
-	for (Node* gb : Application::GetInstancePtr()->GetScene()->GetGameobject()->GetAllChildren())
+	if (this->gameobject->hasCollision())
 	{
-		Gameobject* temp = reinterpret_cast<Gameobject*>(gb);
-
-		if (temp->hasCollision())
+		for (Node* gb : Application::GetInstancePtr()->GetScene()->GetGameobject()->GetAllChildren())
 		{
-			if (temp != this->GetGameObject())
-			{
-				if (Math::Distance(this->GetGameObject()->GetTransform().position, temp->GetTransform().position) < GetRadius(temp))
-				{
-					if (CheckCollision(temp) == true)
-					{
-						if (this->GetGameObject()->GetHitObject() == nullptr)
-						{
-							this->GetGameObject()->SetHitObject(temp);
-							temp->SetHitObject(this->GetGameObject());
-							temp->SetIsColliding(true);
-						}
+			Gameobject* temp = reinterpret_cast<Gameobject*>(gb);
 
-						this->GetGameObject()->SetIsColliding(true);
+			if (temp->hasCollision())
+			{
+				if (temp != this->gameobject)
+				{
+					if (Math::Distance(this->gameobject->GetTransform().position, temp->GetTransform().position) < GetRadius(temp))
+					{
+						if (CheckCollision(temp) == true)
+						{
+							if (this->gameobject->GetHitObject() == nullptr)
+							{
+								this->impactDir = Math::Negate(this->gameobject->GetRigidbody()->GetRigidbodyValues().movementDir);
+								this->gameobject->SetHitObject(temp);
+							}
+
+							this->gameobject->SetIsColliding(true);
+						}
+						else
+						{
+							if (this->gameobject->GetHitObject() == temp)
+							{
+								this->gameobject->SetHitObject(nullptr);
+								this->gameobject->SetIsColliding(false);
+							}
+						}
 					}
 					else
 					{
-						if (this->GetGameObject()->GetHitObject() == temp)
+						if (this->gameobject->GetHitObject() == temp)
 						{
-							this->GetGameObject()->SetHitObject(nullptr);
-							this->GetGameObject()->SetIsColliding(false);
-							temp->SetHitObject(nullptr);
-							temp->SetIsColliding(true);
+							this->gameobject->SetHitObject(nullptr);
+							this->gameobject->SetIsColliding(false);
 						}
 					}
 				}
-				else
+			}
+			else
+			{
+				if (this->gameobject->GetHitObject() == temp)
 				{
-					if (this->GetGameObject()->GetHitObject() == temp)
-					{
-						this->GetGameObject()->SetHitObject(nullptr);
-						this->GetGameObject()->SetIsColliding(false);
-						temp->SetHitObject(nullptr);
-						temp->SetIsColliding(false);
-					}
+					this->gameobject->SetHitObject(nullptr);
+					this->gameobject->SetIsColliding(false);
 				}
 			}
 		}
-	};
+	}
 }
 
 void Collision::Cleanup(void)
 {
-	Component::Cleanup();
 
+}
+
+Math::Vec3 Collision::GetImpactDirection()
+{
+	return this->impactDir;
 }
 
 real Collision::GetRadius(Gameobject* gb)
 {
-	real aradius1 = Math::Distance(this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()));
+	real aradius1 = Math::Distance(this->gameobject->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }, this->gameobject->GetModelMatrixNoRotation()), this->gameobject->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->gameobject->GetModelMatrixNoRotation()));
 	aradius1 = aradius1 * 0.5f;
-	real aradius2 = Math::Distance(this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, -1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()), this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->GetGameObject()->GetModelMatrixNoRotation()));
+	real aradius2 = Math::Distance(this->gameobject->GetWorldCorner(fColorRGBA{ 1, -1, 0, 1.0f }, this->gameobject->GetModelMatrixNoRotation()), this->gameobject->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->gameobject->GetModelMatrixNoRotation()));
 	aradius2 = aradius2 * 0.5f;
 
 	real bradius1 = Math::Distance(gb->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }, gb->GetModelMatrixNoRotation()), gb->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, gb->GetModelMatrixNoRotation()));
@@ -125,8 +128,8 @@ bool Collision::isProjectionIntersecting(Math::Vec3 aCorners[], Math::Vec3 bCorn
 {
 	real aMin, aMax, bMin, bMax;
 
-	GetMinMaxOfProjection(aCorners, axis, aMin, aMax);
-	GetMinMaxOfProjection(bCorners, axis, bMin, bMax);
+	Math::GetMinMaxOfProjection(aCorners, axis, aMin, aMax);
+	Math::GetMinMaxOfProjection(bCorners, axis, bMin, bMax);
 
 	if (aMin > bMax) return false;
 	if (aMax < bMin) return false;
@@ -134,45 +137,14 @@ bool Collision::isProjectionIntersecting(Math::Vec3 aCorners[], Math::Vec3 bCorn
 	return true;
 }
 
-void Collision::GetMinMaxOfProjection(Math::Vec3 corners[], Math::Vec3 axis, real& min, real& max)
-{
-	min = 0.018736723663f;
-	max = 0.018736723663f;
-
-	for (int i = 0; i < 4; i++)
-	{
-		Math::Vec3 point = corners[i];
-
-		real value = ((point.x * axis.x) + (point.y * axis.y)) / ((axis.x * axis.x) + (axis.y * axis.y));
-
-		point = Math::Vec3{value * axis.x, value * axis.y, 0.0f};
-
-		real projection = Math::Dot(point, axis);
-
-		if (min == 0.018736723663f)
-		{
-			min = projection;
-			max = projection;
-		}
-		else
-		{
-			if (projection < min)
-				min = projection;
-
-			if (projection > max)
-				max = projection;
-		}
-	}
-}
-
 bool Collision::CheckCollision(Gameobject* gb)
 {
 	Math::Vec3 aCorners[4] =
 	{
-		this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }),
-		this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }),
-		this->GetGameObject()->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }),
-		this->GetGameObject()->GetWorldCorner(fColorRGBA{ 1, -1, 0, 1.0f }),
+		this->gameobject->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }),
+		this->gameobject->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }),
+		this->gameobject->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }),
+		this->gameobject->GetWorldCorner(fColorRGBA{ 1, -1, 0, 1.0f }),
 	};
 
 	Math::Vec3 bCorners[4] =

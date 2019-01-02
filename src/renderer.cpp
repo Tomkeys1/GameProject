@@ -11,7 +11,13 @@
 #include "application.h"
 #include "typedefs/color.h"
 
-
+bool in_frustum(Math::Mat4x4 M, Math::Vec3 p) {
+	fColorRGBA Pclip = fColorRGBA{ p.x, p.y, 0.0f, 1.0f } * M;
+	return abs(Pclip.r) < Pclip.a &&
+		abs(Pclip.g) < Pclip.a &&
+		0 < Pclip.b &&
+		Pclip.b < Pclip.a;
+}
 //Void Initialize
 void Renderer::Initialize(ui32 displayID, ui32 adapterID, HWND targetWindow)
 {
@@ -138,7 +144,7 @@ void Renderer::Render(void)
 
 	Math::Mat4x4 vp = this->camera->GetVP();
 
-	for (Node* node : Application::GetInstancePtr()->GetScene()->GetGameobject()->GetAllChildren())
+	for (Node* node : Application::GetInstancePtr()->GetScene()->GetGameobject()->GetChildren())
 	{
 		Gameobject* gb = reinterpret_cast<Gameobject*>(node);
 		if (gb->hasMesh() && gb->isVisisble())
@@ -158,6 +164,7 @@ void Renderer::Render(void)
 		}
 
 	}
+
 
 	//Render the image.
 	swapchain->Present(0, 0);

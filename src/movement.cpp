@@ -6,13 +6,12 @@
 #include "typedefs/utils.h"
 #include "typedefs/time.h"
 #include "math/vector3.h"
-#include "math/mathfunctions.h"
 #include "physics/rigidbody.h"
 
 Movement::Movement()
 {
 	Component::Initialize("movement", ComponentType::Movement);
-	this->movement.speed = 0.0f;
+	this->movement.velocity = 0.0f;
 	this->movement.stoppingCoefficient = 50.0f;
 }
 
@@ -27,6 +26,14 @@ void Movement::Update(void)
 {
 	//Execute the components Update function.
 	Component::Update();
+
+	if (!this->GetGameObject()->inViewport())
+	{
+		if(this->movement.direction.x > 0.0f)
+			this->GetGameObject()->GetTransform().position.x -= 200.0f;
+		else
+			this->GetGameObject()->GetTransform().position.x += 200.0f;
+	}
 
 	Rotate();
 	Move();
@@ -49,22 +56,23 @@ void Movement::Move()
 	if (Input::GetInstancePtr()->GetKey(KeyCode::D))
 	{
 		this->movement.direction = Math::GetRightVector(this->GetGameObject()->GetEulerRotation());
-		this->movement.speed += this->movement.velocity;
+		this->movement.velocity += this->movement.speed;
 	}
 	else if (Input::GetInstancePtr()->GetKey(KeyCode::A))
 	{
 		this->movement.direction = Math::Negate(Math::GetRightVector(this->GetGameObject()->GetEulerRotation()));
-		this->movement.speed += this->movement.velocity;
+		this->movement.velocity += this->movement.speed;
 	}
 	else
 	{
-		if (this->movement.speed > 0.0f)
+		if (this->movement.velocity > 0.0f)
 		{
-			this->movement.speed += (0 - this->movement.speed) / this->movement.stoppingCoefficient;
+			this->movement.velocity += (0 - this->movement.velocity) / this->movement.stoppingCoefficient;
 		}
 	}
 
-	this->GetGameObject()->GetRigidbody()->AddForce(this->movement.direction, Math::Clamp(this->movement.speed, 0.0f, this->movement.maxSpeed));
+	this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().movementDir = this->movement.direction;
+	this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = Math::Clamp(this->movement.velocity, -this->movement.maxSpeed, this->movement.maxSpeed);
 }
 
 void Movement::Rotate(void)

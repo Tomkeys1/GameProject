@@ -1,4 +1,5 @@
 #include "components\health.h"
+#include "components\bullet.h"
 #include "scene/scene.h"
 #include "application.h"
 
@@ -27,9 +28,7 @@ void Health::Update(void)
 	{
 		if (this->GetGameObject()->GetHitObject()->GetTag() == "bullet")
 		{
-			LOG("e")
 			this->health.health -= this->health.damage / this->health.resistance;
- 			this->GetGameObject()->GetHitObject()->SetVisi(false);
 			return;
 		}
 	}

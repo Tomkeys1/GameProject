@@ -8,6 +8,7 @@
 #include "scene/gameobject.h"
 #include "scene/scene.h"
 #include "application.h"
+#include "math/vector3.h"
 
 Bullet::Bullet()
 {
@@ -26,17 +27,23 @@ void Bullet::Update(void)
 	//Execute the components Update function.
 	Component::Update();
 
-
 	if (this->bullet.time > 0.0f)
 	{
-		if (this->GetGameObject()->GetHitObject() != nullptr)
+		this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().movementDir = this->bullet.dir;
+		if (this->GetGameObject()->isColliding())
 		{
 			if (this->GetGameObject()->GetHitObject() == reinterpret_cast<Gameobject*>(this->GetGameObject()->GetParent()))
-				this->GetGameObject()->GetRigidbody()->AddForce(this->bullet.dir, this->bullet.speed);
+				this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = this->bullet.speed;
+			else
+			{
+				this->GetGameObject()->SetCollision(false);
+				this->GetGameObject()->SetVisi(false);
+				this->GetGameObject()->SetIsColliding(false);
+			}
 		}
 		else
 		{
-			this->GetGameObject()->GetRigidbody()->AddForce(this->bullet.dir, this->bullet.speed);
+			this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = this->bullet.speed;
 		}
 		this->bullet.time -= 2.0f * Time::deltaTime;
 	}

@@ -9,6 +9,7 @@
 #include "typedefs/components.h"
 
 class Gameobject;
+class Collision;
 
 class Rigidbody
 {
@@ -21,6 +22,11 @@ public:
 
 	void SetGravityCenter(Gameobject* gb = nullptr);
 	void AddForce(Math::Vec3 direction, real force);
+
+	Math::Vec3 GetImpactDirection();
+
+	bool RayCast(Math::Vec3 start, Math::Vec3 end);
+	bool RayCast(Math::Vec3 start, Math::Vec3 end, RaycastInfo& hitInfo);
 	RigidbodyValues& GetRigidbodyValues();
 
 private:
@@ -34,6 +40,8 @@ private:
 	real gravity;
 	real massOfCenter;
 	Math::Vec3 gravityCenter;
+
+	Collision* collision;
 
 	Gameobject* gameobject;
 	Gameobject* gravityGb;

@@ -4,6 +4,7 @@
 #include <vector>
 //INTERNAL INCLUDES
 #include "node.h"
+#include "math/mathfunctions.h"
 #include "typedefs/transform.h"
 #include "typedefs/utils.h"
 #include "math/mat4x4.h"
@@ -26,17 +27,9 @@ public:
 		bool render = true, bool isRoot = false, bool cam = false,
 		Gameobject* parent = nullptr,
 		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f },
-		bool hasCollision = false
+		bool hasCollision = false,
+		bool mirror = false
 	);
-
-	Gameobject
-	(
-		Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, 
-		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f }, 
-		bool render = true, bool isRoot = false,
-		Gameobject* parent = nullptr
-	);
-
 	~Gameobject();
 
 	virtual void Update(void) override;
@@ -57,9 +50,11 @@ public:
 
 	bool hasMesh(void);
 	bool hasCollision(void);
-	bool isColliding();
+	bool isColliding(void);
+	bool IsMirror(void);
 	bool isTrigger(void);
 	bool isVisisble(void);
+	bool inViewport(void);
 
 	std::string GetName(void);
 	std::string GetTag(void);
@@ -70,6 +65,7 @@ public:
 	Math::Vec3 GetWorldCorner(fColorRGBA corner, Math::Mat4x4 matrix);
 	Math::Vec3& GetEulerRotation(void);
 	Math::Quaternion GetRotation(void);
+	Component* GetComponent(ComponentType type);
 	Transform& GetTransform(void);
 	Geometry* GetMesh(void);
 	Shader* GetMaterial(void);
@@ -91,6 +87,7 @@ private:
 
 	std::string name;
 	std::string tag; 
+	bool isMirror = false;
 	bool bMesh;
 	bool collision;
 	bool is_colliding =  false;

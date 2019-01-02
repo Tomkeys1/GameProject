@@ -2,17 +2,29 @@
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
 #include "physics\rigidbody.h"
+#include "physics/collision.h"
 #include "scene/gameobject.h"
 #include "typedefs/time.h"
 
 Rigidbody::Rigidbody(Gameobject* gb)
 {
+	this->collision = new Collision(gb);
 	this->gameobject = gb;
 	this->gravityGb = nullptr;
+	this->rigidBody.velocity = 0.0f;
+	this->rigidBody.movementDir = Math::Vec3::zero;
 }
 
 void Rigidbody::Update(void)
 {
+	if(this->gameobject->hasCollision())
+		this->collision->Update();
+
+	if (this->rigidBody.velocity != 0.0f)
+	{
+		AddForce(this->rigidBody.movementDir, this->rigidBody.velocity);
+	}
+
 	//Area of Object
 	real radius1 = Math::Distance(this->gameobject->GetWorldCorner(fColorRGBA{ -1, 1, 0, 1.0f }, this->gameobject->GetModelMatrixNoRotation()), this->gameobject->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }, this->gameobject->GetModelMatrixNoRotation()));
 	radius1 = radius1 * 0.5f;
@@ -23,7 +35,7 @@ void Rigidbody::Update(void)
 	//Gravity
 	if (this->rigidBody.isEnabled && !this->rigidBody.isKinematic && this->rigidBody.gravityEnabled)
 	{
-		if (this->gameobject->GetHitObject() == nullptr)
+		if (this->gameobject->isColliding() == false)
 		{
 			Gravity();
 		}
@@ -49,6 +61,24 @@ void Rigidbody::SetGravityCenter(Gameobject* gb)
 void Rigidbody::AddForce(Math::Vec3 direction, real force)
 {
 	this->gameobject->GetTransform().position += direction * CalculateVelocity((Time::deltaTime * (force / this->rigidBody.mass)));
+}
+
+Math::Vec3 Rigidbody::GetImpactDirection()
+{
+	return this->collision->GetImpactDirection();
+}
+
+bool Rigidbody::RayCast(Math::Vec3 start, Math::Vec3 end)
+{
+
+
+
+	return false;
+}
+
+bool Rigidbody::RayCast(Math::Vec3 start, Math::Vec3 end, RaycastInfo & hitInfo)
+{
+	return false;
 }
 
 RigidbodyValues& Rigidbody::GetRigidbodyValues()
