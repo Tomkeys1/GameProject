@@ -155,7 +155,7 @@ void Renderer::Render(void)
 			for (Node* child : gb->GetAllChildren())
 			{
 				Gameobject* childGb = reinterpret_cast<Gameobject*>(child);
-				if (childGb->hasMesh() && childGb->isVisisble())
+				if (childGb->hasMesh() && childGb->isVisisble() && gb != childGb)
 				{
 					childGb->GetMesh()->Render(devcon);
 					childGb->GetMaterial()->Render(devcon, childGb->GetMesh()->iLength, Math::Mat4x4(vp * childGb->GetModelMatrix()));

@@ -48,6 +48,10 @@ void Scene::Initialize(void)
 
 
 	AddGameobject("object1", CreateMode::NORMAL, this->GetGameobject("player1"), Color::GetColor(ColorCode::RED), true, true);
+	this->gameObjects["object1"]->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
+	this->gameObjects["object1"]->GetRigidbody()->GetRigidbodyValues().isKinematic = true;
+	this->gameObjects["object1"]->GetRigidbody()->GetRigidbodyValues().mass = 4000000.0f;
+
 
 	this->gameObjects["object1"]->GetTransform().position = { 30, 70.0f, 0.0f };
 	this->gameObjects["object1"]->GetTransform().scaling = { 1.0f, 1.0f, 0 };
@@ -56,10 +60,6 @@ void Scene::Initialize(void)
 	AddGameobject("ground", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::GREEN), true, true);
 	this->gameObjects["ground"]->GetTransform().position = { 0, -100, 0.0f };
 	this->gameObjects["ground"]->GetTransform().scaling = { 100.0f, 0.50f, 0 };
-
-	AddGameobject("test", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::BLUE));
-	this->gameObjects["test"]->GetTransform().position = { 100, 100, 0.0f };
-	this->gameObjects["test"]->GetTransform().scaling = { 0.01f, 0.01f, 0 };
 
 }
 

@@ -30,18 +30,26 @@ void Bullet::Update(void)
 	if (this->bullet.time > 0.0f)
 	{
 		this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().movementDir = this->bullet.dir;
+		LOG("%f", this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().movementDir.y)
 		if (this->GetGameObject()->isColliding())
 		{
 			if (this->GetGameObject()->GetHitObject() == reinterpret_cast<Gameobject*>(this->GetGameObject()->GetParent()))
 				this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = this->bullet.speed;
 			else
 			{
-				this->GetGameObject()->SetCollision(false);
-				this->GetGameObject()->SetVisi(false);
-				this->GetGameObject()->SetIsColliding(false);
+				if (this->GetGameObject()->GetHitObject()->IsMirror())
+				{
+					Math::Vec3 normal = this->GetGameObject()->GetRigidbody()->GetImpactNormal();
+					Math::Vec3 normalSquared = (Math::Abs(normal) * Math::Abs(normal));
+					real dot = Math::Dot(this->bullet.dir, normal);
+					this->bullet.dir = this->bullet.dir - (normal * 2.0f) * dot;
+					this->GetGameObject()->SetCollision(false);
+					this->GetGameObject()->SetIsColliding(false);
+
+				}
 			}
 		}
-		else
+ 		else
 		{
 			this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = this->bullet.speed;
 		}

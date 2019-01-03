@@ -19,10 +19,12 @@ public:
 	void Update(void);
 	void Cleanup(void);
 	Math::Vec3 GetImpactDirection();
+	Math::Vec3 GetImpactNormal();
 
 private:
 	real GetRadius(Gameobject* gb);
 
+	Math::Vec3 CalculateImpactNormal();
 	Math::Vec3 GetAxis(Math::Vec3 point1, Math::Vec3 point2);
 	bool isProjectionIntersecting(Math::Vec3 aCorners[], Math::Vec3 bCorners[], Math::Vec3 normal);
 
@@ -31,5 +33,6 @@ private:
 
 	real collisionRange;
 	Math::Vec3 impactDir;
+	Math::Vec3 impactNormal;
 	Gameobject* gameobject;
 };

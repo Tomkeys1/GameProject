@@ -90,6 +90,16 @@ namespace Math
 		};
 	}
 
+	inline Vec3 operator*(const Vec3& lhs, const Vec3 rhs)
+	{
+		return Vec3
+		{
+			(lhs.x * rhs.x),
+			(lhs.y * rhs.y),
+			(lhs.z * rhs.z)
+		};
+	}
+
 	//Divide each vector3 value by a scalar product.
 	inline Vec3 operator/(const Vec3& lhs, float scalar)
 	{
@@ -267,6 +277,16 @@ namespace Math
 			-vec.x,
 			-vec.y,
 			-vec.z
+		};
+	}
+	
+	inline Vec3 Abs(const Vec3& vec)
+	{
+		return Vec3
+		{
+			abs(vec.x),
+			abs(vec.y),
+			abs(-vec.z)
 		};
 	}
 }

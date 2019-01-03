@@ -68,6 +68,11 @@ Math::Vec3 Rigidbody::GetImpactDirection()
 	return this->collision->GetImpactDirection();
 }
 
+Math::Vec3 Rigidbody::GetImpactNormal()
+{
+	return this->collision->GetImpactNormal();
+}
+
 bool Rigidbody::RayCast(Math::Vec3 start, Math::Vec3 end)
 {
 

@@ -44,6 +44,7 @@ void Collision::Update(void)
 							{
 								this->impactDir = Math::Negate(this->gameobject->GetRigidbody()->GetRigidbodyValues().movementDir);
 								this->gameobject->SetHitObject(temp);
+								this->impactNormal = CalculateImpactNormal();
 							}
 
 							this->gameobject->SetIsColliding(true);
@@ -87,6 +88,33 @@ void Collision::Cleanup(void)
 Math::Vec3 Collision::GetImpactDirection()
 {
 	return this->impactDir;
+}
+
+Math::Vec3 Collision::GetImpactNormal()
+{
+	return this->impactNormal;
+}
+
+Math::Vec3 Collision::CalculateImpactNormal()
+{
+	if
+	(
+			this->gameobject->GetHitObject()->GetTransform().position.x < this->gameobject->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }).x &&
+			this->gameobject->GetHitObject()->GetTransform().position.x > this->gameobject->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }).x
+	)
+	{
+		if (this->gameobject->GetHitObject()->GetTransform().position.y > this->gameobject->GetTransform().position.y)
+			return Math::Vec3::unit_y;
+		else
+			return Math::Vec3::neg_unit_y;
+	}
+	else
+	{
+		if (this->gameobject->GetHitObject()->GetTransform().position.x > this->gameobject->GetTransform().position.x)
+			return Math::Vec3::neg_unit_y;
+		else
+			return Math::Vec3::neg_unit_x;
+	}
 }
 
 real Collision::GetRadius(Gameobject* gb)

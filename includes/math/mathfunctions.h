@@ -60,4 +60,9 @@ namespace Math
 			}
 		}
 	}
+
+	inline Math::Vec3 GetMirroredVector(Math::Vec3 dir, Math::Vec3 normal)
+	{
+
+	}
 }

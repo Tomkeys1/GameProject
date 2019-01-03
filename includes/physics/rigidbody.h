@@ -24,6 +24,7 @@ public:
 	void AddForce(Math::Vec3 direction, real force);
 
 	Math::Vec3 GetImpactDirection();
+	Math::Vec3 GetImpactNormal();
 
 	bool RayCast(Math::Vec3 start, Math::Vec3 end);
 	bool RayCast(Math::Vec3 start, Math::Vec3 end, RaycastInfo& hitInfo);

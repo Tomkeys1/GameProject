@@ -27,7 +27,7 @@ ui32 main(ui32 argc, char** argv)
 	Console::GetInstancePtr()->SetCVar(gamepath);
 
 	//Execute the application functions.
-	Application::GetInstancePtr()->Initialize("Game", iVec2{ 1700, 800 });
+	Application::GetInstancePtr()->Initialize("Game", iVec2{ 1200, 800 }, 1);
 	Application::GetInstancePtr()->Update();
 	Application::GetInstancePtr()->CleanUp();
 }
