@@ -14,86 +14,124 @@
 #include "components/bullet.h"
 #include "rendering/camera.h"
 #include "physics/rigidbody.h"
+#include "components/enemies/espawnbehaviour.h"
 
 Scene::Scene()
 {
-	this->root = new Gameobject(false, true);
-	this->root->SetName("scene");
+	this->root = new Gameobject("scene", false, true);
 	this->root->MakeRoot();
-	Application::GetInstancePtr()->AddGameobject(this->root);
 }
 
 void Scene::Initialize(void)
 {
+	//Player
 	AddGameobject("player1", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::YELLOW), true);
-
-	Movement* mov = new Movement;
-	Shooting* shot = new Shooting;
-
-	AddComponent(this->gameObjects["player1"], mov);
-	AddComponent(this->gameObjects["player1"], shot);
-
-	mov->GetMovementValues().speed = 10.0f;
-	mov->GetMovementValues().maxSpeed = 10000.0f;
-	mov->GetMovementValues().rotationSpeed = 80.0f;
-
-	shot->GetShootingValues().growth = 0.4f;
-	shot->GetShootingValues().time = 3.0f;
-	shot->GetShootingValues().speed = 0.0f;
-
 	this->gameObjects["player1"]->GetTransform().position = { 0, -70.0f, 0.0f };
 	this->gameObjects["player1"]->GetTransform().scaling = { 0.2f, 0.4f, 0 };
 	this->gameObjects["player1"]->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
 	this->gameObjects["player1"]->GetRigidbody()->GetRigidbodyValues().mass = 100.0f;
+	this->gameObjects["player1"]->SetTag("player");
+
+	Movement* mov = new Movement;
+	mov->GetMovementValues().speed = 1000.0f;
+	mov->GetMovementValues().maxSpeed = 200000.0f;
+	mov->GetMovementValues().rotationSpeed = 80.0f;
+	AddComponent(this->gameObjects["player1"], mov);
+
+	Shooting* shot = new Shooting;
+	shot->GetShootingValues().growth = 2.0f;
+	shot->GetShootingValues().time = 3.0f;
+	shot->GetShootingValues().speed = 700.0f;
+	AddComponent(this->gameObjects["player1"], shot);
 
 
-	AddGameobject("object1", CreateMode::NORMAL, this->GetGameobject("player1"), Color::GetColor(ColorCode::RED), true, true);
-	this->gameObjects["object1"]->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
-	this->gameObjects["object1"]->GetRigidbody()->GetRigidbodyValues().isKinematic = true;
-	this->gameObjects["object1"]->GetRigidbody()->GetRigidbodyValues().mass = 4000000.0f;
+	////TestMirror
+	AddGameobject("mirror", CreateMode::NORMAL, this->gameObjects["player1"], Color::GetColor(ColorCode::RED), true, Meshes::BOX, true);
+	this->gameObjects["mirror"]->GetTransform().position = { 30, 70.0f, 0.0f };
+	this->gameObjects["mirror"]->GetTransform().scaling = { 1.0f, 1.0f, 0 };
 
-
-	this->gameObjects["object1"]->GetTransform().position = { 30, 70.0f, 0.0f };
-	this->gameObjects["object1"]->GetTransform().scaling = { 1.0f, 1.0f, 0 };
-
-
-	AddGameobject("ground", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::GREEN), true, true);
+	//Ground
+	AddGameobject("ground", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::BLACK), true, Meshes::BOX, false);
 	this->gameObjects["ground"]->GetTransform().position = { 0, -100, 0.0f };
 	this->gameObjects["ground"]->GetTransform().scaling = { 100.0f, 0.50f, 0 };
 
+	//Prefab Bullet
+	AddGameobject("bullet", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::BLUE), true, Meshes::TRIANGLE, false);
+	this->gameObjects["bullet"]->GetTransform().position = { 1000, 1000, 1000 };
+	this->gameObjects["bullet"]->GetTransform().scaling = { 0.07f, 0.20f, 0 };
+	this->gameObjects["bullet"]->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
+	this->gameObjects["bullet"]->GetRigidbody()->GetRigidbodyValues().gravityEnabled = false;
+	this->gameObjects["bullet"]->GetRigidbody()->GetRigidbodyValues().dragCoefficient = 0.001f;
+	this->gameObjects["bullet"]->GetRigidbody()->GetRigidbodyValues().mass = 100.0f;
+	this->gameObjects["bullet"]->SetTag("bullet");
+	this->gameObjects["bullet"]->SetActive(false);
+	this->gameObjects["bullet"]->SetVisiblity(false);
+
+	Bullet* bullet = new Bullet;
+	AddComponent(this->gameObjects["bullet"], bullet);
+
+	//Prefab normal enemy
+	AddGameobject("normalEnemy", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::RED), true, Meshes::BOX, false);
+	this->gameObjects["normalEnemy"]->GetTransform().position = { 0, 0, 0 };
+	this->gameObjects["normalEnemy"]->GetTransform().scaling = { 0.3f, 0.3f, 0 };
+	this->gameObjects["normalEnemy"]->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
+	this->gameObjects["normalEnemy"]->GetRigidbody()->GetRigidbodyValues().gravityEnabled = false;
+	this->gameObjects["normalEnemy"]->SetTag("nEnemy");
+	this->gameObjects["normalEnemy"]->SetActive(false);
+	this->gameObjects["normalEnemy"]->SetVisiblity(false);
+
+	Shooting* nEShot = new Shooting;
+	nEShot->GetShootingValues().speed = 1000.0f;
+	nEShot->GetShootingValues().time = 5.0f;
+	AddComponent(this->gameObjects["normalEnemy"], nEShot);
+
+
+	//Object Pools
+	this->CreateObjectPool("bullets", 2000, this->gameObjects["bullet"]);
+	this->CreateObjectPool("normalEnemies", 100, this->gameObjects["normalEnemy"]);
+
+
+	//Enemies
+	this->eSpawner = new EnemySpawner;
+	this->eSpawner->Initialize();
+} 
+
+
+void Scene::CreateObjectPool(std::string name, ui32 amount, Gameobject* type)
+{
+	std::vector<Gameobject*> temp;
+
+	for (int i = 0; i < amount; i++)
+	{
+		if (i == 0)
+			temp.push_back(type);
+		else
+		{
+			Gameobject* bullet = type->CreateCopy(true);
+			temp.push_back(bullet);
+		}
+	}
+
+	this->objectPools[name] = temp;
 }
 
-
-void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent, fColorRGBA color, bool hasCollision, bool isMirror)
+void Scene::AddGameobject(const char* name, CreateMode mode, Gameobject* parent, fColorRGBA color, bool hasCollision, Meshes mesh, bool isMirror)
 {
 	if (mode == CreateMode::EMPTY)
 	{
-		this->gameObjects[name] = new Gameobject(false, false, false, parent, color, hasCollision, isMirror);
-		this->gameObjects[name]->SetName(name);
-
-		Application::GetInstancePtr()->AddGameobject(this->gameObjects[name]);
-
-		if (parent == nullptr)
-		{
-			this->gameObjects[name]->SetParent(this->root);
-			this->root->AddChild(this->gameObjects[name]);
-		}
+		this->gameObjects[name] = new Gameobject(name, false, false, false, parent, color, hasCollision, mesh, isMirror);
 	}
 	else if (mode == CreateMode::NORMAL)
 	{
-		this->gameObjects[name] = new Gameobject(true, false, false, parent, color, hasCollision, isMirror);
-		this->gameObjects[name]->SetName(name);
-
-		Application::GetInstancePtr()->AddGameobject(this->gameObjects[name]);
-
-		if (parent == nullptr)
-		{
-			this->gameObjects[name]->SetParent(this->root);
-			this->root->AddChild(this->gameObjects[name]);
-		}
+		this->gameObjects[name] = new Gameobject(name, true, false, false, parent, color, hasCollision, mesh, isMirror);
 
 		Application::GetInstancePtr()->GetRenderer()->InitializeGameobject(this->gameObjects[name]);
 	}
+}
+
+void Scene::AddGameobject(Gameobject* gb)
+{
+	this->gameObjects[gb->GetName()] = gb;
 }
 
 void Scene::AddMesh(Gameobject* gb, Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength)
@@ -126,9 +164,26 @@ void Scene::AddComponent(Gameobject* gb, Component* com)
 	gb->AddComponent(com);
 }
 
-void Scene::DeleteGameobject(Gameobject* gb)
+void Scene::DeleteGameobject(Gameobject* gb, bool deactivate)
 {
+	gb->SetDeactivate(true);
 	this->deleteGb.push_back(gb);
+}
+
+void Scene::SetActivity(Gameobject* gb, Gameobject* parent, bool active)
+{
+	if (active)
+	{
+		if (parent == nullptr)
+			this->root->AddChild(gb);
+		else
+			if (gb->GetParent() == nullptr)
+				parent->AddChild(gb);
+	}
+	else
+	{
+		this->root->DeleteChild(gb, nullptr);
+	}
 }
 
 void Scene::DeleteGameobjects(void)
@@ -137,9 +192,19 @@ void Scene::DeleteGameobjects(void)
 	{
 		for (Gameobject* gb : this->deleteGb)
 		{
-			this->gameObjects[gb->GetName()]->GetParent()->GetChildren().remove(gb);
-			this->gameObjects.erase(gb->GetName());
-			gb->Cleanup();
+			if (gb->isDeactivate())
+			{
+				gb->SetActive(false);
+			}
+			else
+			{
+				Node* g = this->gameObjects[gb->GetName()]->GetParent();
+
+				this->gameObjects[gb->GetName()]->GetParent()->GetChildren().remove(gb);
+				this->gameObjects.erase(gb->GetName());
+				this->root->GetAllChildren().remove(gb);
+				gb->Cleanup();
+			}
 		}
 		this->deleteGb.clear();
 	}
@@ -155,14 +220,50 @@ Gameobject* Scene::GetGameobject()
 	return this->root;
 }
 
+Gameobject* Scene::GetObjectItem(std::string objectPool, bool deleteObject)
+{
+	Gameobject* temp = this->objectPools[objectPool][this->objectPools[objectPool].size() - 1];
+
+	if (deleteObject)
+	{
+		if (this->objectPools[objectPool].size() != 0)
+		{
+			this->objectPools[objectPool].pop_back();
+			return temp;
+		}
+		else
+			LOG("objectPool has no elements!")
+	}
+	else
+	{
+		this->objectPools[objectPool].pop_back();
+		this->objectPools[objectPool].insert(this->objectPools[objectPool].begin(), temp);
+		return temp;
+	}
+
+	LOG("Error")
+
+	return nullptr;
+}
+
 void Scene::Update(real deltaTime)
 {
-	Time::deltaTime = deltaTime / 1000.0f;
+	Time::deltaTime = deltaTime;
+	this->eSpawner->Update();
 	this->root->Update();
 }
 
 void Scene::Cleanup(void)
 {
+	std::map<std::string, Gameobject*>::iterator it;
+
+	for (it = this->gameObjects.begin(); it != this->gameObjects.end(); it++)
+	{
+		it->second->Cleanup();
+	}
+
 	this->gameObjects.clear();
 	this->root->Cleanup();
+	this->eSpawner->Cleanup();
+	delete this->eSpawner;
 }

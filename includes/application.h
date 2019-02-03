@@ -18,6 +18,7 @@ class Node;
 class Scene;
 class Camera;
 
+
 //Class Application
 class Application
 {
@@ -29,7 +30,6 @@ public:
 	void Initialize(char* title, iVec2 resolution, ui32 displayID = 0);
 	void Update(void);
 	void CleanUp(void);
-	void AddGameobject(Gameobject* gb);
 
 	Filesystem* GetFilesystem();
 	Renderer* GetRenderer();

@@ -23,6 +23,7 @@ struct MovementValues
 
 struct BulletValues
 {
+	bool activated;
 	real speed;
 	real time;
 	Math::Vec3 dir;
@@ -35,6 +36,7 @@ struct ShootingValues
 	real timer;
 	real cooldown;
 	real speed;
+	real bulletSpeed;
 	real growth;
 	real time;
 };

@@ -1,5 +1,6 @@
 //EXTERNAL INCLUDES
 #include <chrono>
+#include <time.h>
 #include <iostream>
 //INTERNAL INCLUDES
 #include "systems/inputhandler.h"
@@ -15,10 +16,12 @@
 Shooting::Shooting()
 {
 	Component::Initialize("shooting", ComponentType::Shoot);
-	this->shoot.available = true;
+	this->shoot.available = false;
 	this->shoot.timer = 0.0f;
-	this->shoot.cooldown = 0.0f;
+	this->shoot.cooldown = 0.1f;
 	this->shoot.shotID = 0;
+	this->shoot.speed = 200.0f;
+	this->shoot.bulletSpeed = this->shoot.speed;
 }
 
 //Void Initialize
@@ -34,64 +37,19 @@ void Shooting::Update(void)
 	Component::Update();
 
 		if (this->shoot.timer > 0.0f)
-			this->shoot.timer -= 2.0f * Time::deltaTime;
+			this->shoot.timer -= 1.0f * Time::deltaTime;
 		else
 			this->shoot.available = true;
 
-	if (Input::GetInstancePtr()->GetKey(KeyCode::Space))
-	{
-		if (this->GetGameObject()->isVisisble())
+		if (this->GetGameObject()->GetTag() == "player")
 		{
-			this->shoot.speed += this->shoot.growth;
+			PlayerShooting();
 		}
-	}
-
-	if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Space) && this->shoot.available)
-	{
-		this->shoot.available = false;
-		this->shoot.timer = this->shoot.cooldown;
-
-		if (this->GetGameObject()->isVisisble())
+		else if (this->GetGameObject()->GetTag() == "nEnemy")
 		{
-			using namespace std;
-			auto start = chrono::steady_clock::now();
-
- 			std::string tempStr = this->GetGameObject()->GetName();
-			tempStr += " shot";
-			tempStr += this->shoot.shotID;
-			Application::GetInstancePtr()->GetScene()->AddGameobject(tempStr.c_str(), CreateMode::NORMAL, this->GetGameObject(), Color::GetColor(ColorCode::BLUE), true);
-			Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetGameobject(tempStr.c_str());
-			temp->GetTransform().scaling = { 0.05f, 0.15f, 0 };
-			temp->GetTransform().position = GetPos(temp);
-			temp->GetEulerRotation() = this->GetGameObject()->GetEulerRotation();
-			temp->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
-			temp->GetRigidbody()->GetRigidbodyValues().gravityEnabled = false;
-			temp->GetRigidbody()->GetRigidbodyValues().dragCoefficient = 0.001f;
-			temp->GetRigidbody()->GetRigidbodyValues().mass = 100.0f;
-			temp->SetTag("bullet");
-
-			Bullet* bullet = new Bullet;
-			Application::GetInstancePtr()->GetScene()->AddComponent(temp, bullet);
-			bullet->GetBulletValues().dir = Math::GetForwardVector(this->GetGameObject()->GetEulerRotation());
-			bullet->GetBulletValues().speed = this->shoot.speed;
-			bullet->GetBulletValues().time = this->shoot.time;
-
-			this->shoot.speed = 20.0f;
-			this->shoot.shotID++;
-
-
-			auto end = chrono::steady_clock::now();
-
-			cout << "Elapsed time in milliseconds : "
-				<< chrono::duration_cast<chrono::milliseconds>(end - start).count()
-				<< " ms" << endl;
+			NEnemyShooting();
 		}
-	}
 
-	if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Q))
-	{
-
-	}
 }
 
 void Shooting::Cleanup(void)
@@ -105,9 +63,72 @@ ShootingValues& Shooting::GetShootingValues(void)
 	return this->shoot;
 }
 
+void Shooting::PlayerShooting(void)
+{
+	if (Input::GetInstancePtr()->GetKey(KeyCode::Space))
+	{
+		if (this->GetGameObject()->isVisisble())
+		{
+			this->shoot.speed += this->shoot.growth;
+		}
+	}
+
+	if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Space) && this->shoot.available)
+	{
+		this->shoot.available = false;
+		this->shoot.timer = this->shoot.cooldown;
+		this->shoot.bulletSpeed = this->shoot.speed;
+
+		if (this->GetGameObject()->isVisisble())
+		{
+			Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetObjectItem("bullets", false);
+			temp->GetTransform().position = GetPos(temp);
+			temp->GetEulerRotation() = this->GetGameObject()->GetEulerRotation();
+			temp->SetVisi(true);
+			temp->SetActive(true, this->GetGameObject());
+
+			reinterpret_cast<Bullet*>(temp->GetComponent(ComponentType::Bullet))->GetBulletValues().dir = Math::GetForwardVector(this->GetGameObject()->GetEulerRotation());
+			reinterpret_cast<Bullet*>(temp->GetComponent(ComponentType::Bullet))->GetBulletValues().speed = this->shoot.bulletSpeed;
+			reinterpret_cast<Bullet*>(temp->GetComponent(ComponentType::Bullet))->GetBulletValues().time = this->shoot.time;
+
+			this->shoot.shotID++;
+		}
+	}
+
+	if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Q))
+	{
+
+	}
+
+}
+
+void Shooting::NEnemyShooting(void)
+{
+	if (this->shoot.available)
+	{
+		this->shoot.available = false;
+		this->shoot.timer = rand() % static_cast<ui32>(this->shoot.cooldown) + 5;
+
+		if (this->GetGameObject()->isVisisble())
+		{
+			Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetObjectItem("bullets", false);
+			temp->GetTransform().position = GetPos(temp);
+			temp->GetEulerRotation() = this->GetGameObject()->GetEulerRotation();
+			temp->SetVisi(true);
+			temp->SetActive(true, this->GetGameObject());
+
+			reinterpret_cast<Bullet*>(temp->GetComponent(ComponentType::Bullet))->GetBulletValues().dir = Math::GetForwardVector(this->GetGameObject()->GetEulerRotation());
+			reinterpret_cast<Bullet*>(temp->GetComponent(ComponentType::Bullet))->GetBulletValues().speed = this->shoot.bulletSpeed;
+			reinterpret_cast<Bullet*>(temp->GetComponent(ComponentType::Bullet))->GetBulletValues().time = this->shoot.time;
+
+			this->shoot.shotID++;
+		}
+	}
+}
+
 Math::Vec3 Shooting::GetPos(Gameobject* gb)
 {
-	Math::Vec3 temp = Math::Vec3{ this->GetGameObject()->GetWorldCorner(fColorRGBA{0, 1, 0, 1.0f})};
+	Math::Vec3 temp = Math::Vec3{ this->GetGameObject()->GetWorldCorner(fColorRGBA{0, 1.5F, 0, 1.0f})};
 
 	return temp;
 }

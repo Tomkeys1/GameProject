@@ -1,6 +1,5 @@
 //EXTERNAL INCLUDES
 #include <chrono>
-#include <iostream>
 //INTERNAL INCLUDES
 #include "components/bullet.h"
 #include "physics/rigidbody.h"
@@ -24,28 +23,39 @@ void Bullet::Initialize(Gameobject* gb)
 
 void Bullet::Update(void)
 {
+	if (!this->bullet.activated)
+		return;
 	//Execute the components Update function.
 	Component::Update();
 
 	if (this->bullet.time > 0.0f)
 	{
 		this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().movementDir = this->bullet.dir;
-		LOG("%f", this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().movementDir.y)
 		if (this->GetGameObject()->isColliding())
 		{
-			if (this->GetGameObject()->GetHitObject() == reinterpret_cast<Gameobject*>(this->GetGameObject()->GetParent()))
-				this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = this->bullet.speed;
-			else
+			if (this->GetGameObject()->GetHitObject() != nullptr)
 			{
-				if (this->GetGameObject()->GetHitObject()->IsMirror())
+				if (this->GetGameObject()->GetHitObject() == reinterpret_cast<Gameobject*>(this->GetGameObject()->GetParent()) || this->GetGameObject()->GetHitObject()->GetComponent(ComponentType::Bullet) != nullptr)
+					this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = this->bullet.speed;
+				else
 				{
-					Math::Vec3 normal = this->GetGameObject()->GetRigidbody()->GetImpactNormal();
-					Math::Vec3 normalSquared = (Math::Abs(normal) * Math::Abs(normal));
-					real dot = Math::Dot(this->bullet.dir, normal);
-					this->bullet.dir = this->bullet.dir - (normal * 2.0f) * dot;
-					this->GetGameObject()->SetCollision(false);
-					this->GetGameObject()->SetIsColliding(false);
+					if (this->GetGameObject()->GetHitObject()->IsMirror())
+					{
+						Math::Vec3 normal = this->GetGameObject()->GetRigidbody()->GetImpactNormal();
+						real dot = Math::Dot(this->bullet.dir, normal);
+						this->bullet.dir = this->bullet.dir - (normal * 2.0f) * dot;
 
+						//Math::Vec3 vec1 = Math::GetForwardVector(this->GetGameObject()->GetEulerRotation());
+						//Math::Vec3 vec2 = this->bullet.dir;
+						//dot = Math::Dot(vec1, vec2);
+						//// Divide the dot by the product of the magnitudes of the vectors
+						//dot = dot / (Math::Length(vec1) * Math::Length(vec2));
+						////Get the arc cosin of the angle, you now have your angle in radians 
+						//real arccos = acos(dot);
+						////Multiply by 180/Mathf.PI to convert to degrees
+						//real angle = arccos * 180 / M_PI;
+						//this->GetGameObject()->GetEulerRotation().z += angle;
+					}
 				}
 			}
 		}
@@ -53,11 +63,12 @@ void Bullet::Update(void)
 		{
 			this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = this->bullet.speed;
 		}
-		this->bullet.time -= 2.0f * Time::deltaTime;
+
+		this->bullet.time -= 1.0f * Time::deltaTime;
 	}
 	else
 	{
-		Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject());
+		Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject(), true);
 	}
 
 }

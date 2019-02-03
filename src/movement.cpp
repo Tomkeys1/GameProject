@@ -12,7 +12,8 @@ Movement::Movement()
 {
 	Component::Initialize("movement", ComponentType::Movement);
 	this->movement.velocity = 0.0f;
-	this->movement.stoppingCoefficient = 50.0f;
+	this->movement.direction = Math::Vec3::zero;
+	this->movement.stoppingCoefficient = 25.0f;
 }
 
 //Void Initialize
@@ -35,7 +36,7 @@ void Movement::Update(void)
 			this->GetGameObject()->GetTransform().position.x += 200.0f;
 	}
 
-	Rotate();
+	//Rotate();
 	Move();
 
 }
@@ -62,6 +63,11 @@ void Movement::Move()
 	{
 		this->movement.direction = Math::Negate(Math::GetRightVector(this->GetGameObject()->GetEulerRotation()));
 		this->movement.velocity += this->movement.speed;
+	}
+	else if (Input::GetInstancePtr()->GetKey(KeyCode::S))
+	{
+		this->movement.direction = this->movement.direction;
+		this->movement.velocity = 0.0f;
 	}
 	else
 	{

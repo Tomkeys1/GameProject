@@ -4,37 +4,63 @@
 #include "rendering/geometry.h"
 #include "typedefs/utils.h"
 
-Geometry::Geometry(Gameobject* gb, fColorRGBA col)
+Geometry::Geometry(Gameobject* gb, fColorRGBA col, Meshes mesh)
 {
 	this->color = col;
-
-	Vertex* v = new Vertex[4];
-	ui32* i = new ui32[6];
-
-	v[0].position = fColorRGBA{ -1, 1, 0, 1.0f };
-	v[0].color = this->color;
+	this->meshType = mesh;
 	
-	v[1].position = fColorRGBA{ 1, 1, 0, 1.0f };
-	v[1].color = this->color;
+	switch (mesh)
+	{
+	case Meshes::BOX:
+		this->vertices = new Vertex[4];
+		this->indicies = new ui32[6];
 
-	v[2].position = fColorRGBA{ 1, -1, 0, 1.0f };
-	v[2].color = this->color;
+		this->vertices[0].position = fColorRGBA{ -1, 1, 0, 1.0f };
+		this->vertices[0].color = this->color;
 
-	v[3].position = fColorRGBA{ -1, -1, 0, 1.0f };
-	v[3].color = this->color;
+		this->vertices[1].position = fColorRGBA{ 1, 1, 0, 1.0f };
+		this->vertices[1].color = this->color;
 
-	i[0] = 3;
-	i[1] = 0;
-	i[2] = 1;
-	i[3] = 3;
-	i[4] = 1;
-	i[5] = 2;
+		this->vertices[2].position = fColorRGBA{ 1, -1, 0, 1.0f };
+		this->vertices[2].color = this->color;
 
-	
-	this->vertices = v;
-	this->indicies = i;
-	this->vLength = 4;
-	this->iLength = 6;
+		this->vertices[3].position = fColorRGBA{ -1, -1, 0, 1.0f };
+		this->vertices[3].color = this->color;
+
+		this->indicies[0] = 3;
+		this->indicies[1] = 0;
+		this->indicies[2] = 1;
+		this->indicies[3] = 3;
+		this->indicies[4] = 1;
+		this->indicies[5] = 2;
+
+		this->vLength = 4;
+		this->iLength = 6;
+		break;
+
+	case Meshes::TRIANGLE:
+		this->vertices = new Vertex[3];
+		this->indicies = new ui32[3];
+
+		this->vertices[0].position = fColorRGBA{ -1, -1, 0, 1.0f };
+		this->vertices[0].color = this->color;
+
+		this->vertices[1].position = fColorRGBA{ 0, 0, 0, 1.0f };
+		this->vertices[1].color = this->color;
+
+		this->vertices[2].position = fColorRGBA{ 1, -1, 0, 1.0f };
+		this->vertices[2].color = this->color;
+
+		this->indicies[0] = 0;
+		this->indicies[1] = 1;
+		this->indicies[2] = 2;
+
+		this->vLength = 3;
+		this->iLength = 3;
+		break;
+
+	}
+
 	this->gameobject = gb;
 }
 
@@ -134,4 +160,14 @@ Gameobject* Geometry::GetGameobject(void)
 Vertex* Geometry::GetVertices(void)
 {
 	return this->vertices;
+}
+
+fColorRGBA Geometry::GetColor(void)
+{
+	return this->color;
+}
+
+Meshes Geometry::GetMeshType(void)
+{
+	return this->meshType;
 }

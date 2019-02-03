@@ -1,5 +1,6 @@
 
 // EXTERNAL INCLUDES
+#include <thread>
 // INTERNAL INCLUDES
 #include "application.h"
 #include "scene/gameobject.h"
@@ -33,33 +34,42 @@ void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 //Void Updatea
 void Application::Update(void)
 {
-	DWORD prev_frame_tick;
-	DWORD curr_frame_tick = GetTickCount64();
-
 	//Do loop.
-	do
+
+	real delta_time = 0.0f;
+	std::chrono::time_point currentTime = std::chrono::steady_clock::now();
+	std::chrono::time_point newTime = std::chrono::steady_clock::now();
+
+	INIT_TIMER;
+	while (this->running)
 	{
+		START_TIMER;
+		newTime = std::chrono::steady_clock::now();
 
-		prev_frame_tick = curr_frame_tick;
-		curr_frame_tick = GetTickCount64();
+		delta_time = std::chrono::duration_cast<std::chrono::duration<real>>(newTime - currentTime).count();
+		currentTime = newTime;
 
-		// Input Handling
 		Window::GetInstancePtr()->DispatchMessages();
-		if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Escape))
-			break;
+		if (Input::GetInstancePtr()->GetKeyUp(KeyCode::P))
+		{
+			this->running = false;
+				break;
+			}
 
-		// Update Gamestate
-		this->scene->Update(curr_frame_tick - prev_frame_tick);
+		// Update Gamestate && Update Renderer
+		std::thread gamestateThread(&Scene::Update,this->scene, delta_time);
+		std::thread renderThread(&Renderer::Render, Application::renderer);
+		gamestateThread.join();
+		renderThread.join();
 
 		if (Input::GetInstancePtr()->GetUpState())
 			Input::GetInstancePtr()->EradicateUpKeys();
 
-		// Render Gamestate
-		Application::renderer->Render();
-
 		this->scene->DeleteGameobjects();
+		
+		STOP_TIMER("Update time taken: ");
+	}
 
-	} while (running);
 }
 
 //Void Cleanup
@@ -76,10 +86,6 @@ void Application::CleanUp(void)
 	Application::GetInstancePtr()->Release();
 }
 
-void Application::AddGameobject(Gameobject* gb)
-{
-	this->gameObjects.push_back(gb);
-}
 
 Filesystem* Application::GetFilesystem()
 {

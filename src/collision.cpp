@@ -99,19 +99,19 @@ Math::Vec3 Collision::CalculateImpactNormal()
 {
 	if
 	(
-			this->gameobject->GetHitObject()->GetTransform().position.x < this->gameobject->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }).x &&
-			this->gameobject->GetHitObject()->GetTransform().position.x > this->gameobject->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }).x
+   			this->gameobject->GetHitObject()->GetWorldCorner(fColorRGBA{ 1, 1, 0, 1.0f }).x > this->gameobject->GetTransform().position.x &&
+			this->gameobject->GetHitObject()->GetWorldCorner(fColorRGBA{ -1, -1, 0, 1.0f }).x < this->gameobject->GetTransform().position.x
 	)
 	{
 		if (this->gameobject->GetHitObject()->GetTransform().position.y > this->gameobject->GetTransform().position.y)
-			return Math::Vec3::unit_y;
-		else
 			return Math::Vec3::neg_unit_y;
+		else
+			return Math::Vec3::unit_y;
 	}
 	else
 	{
 		if (this->gameobject->GetHitObject()->GetTransform().position.x > this->gameobject->GetTransform().position.x)
-			return Math::Vec3::neg_unit_y;
+			return Math::Vec3::unit_x;
 		else
 			return Math::Vec3::neg_unit_x;
 	}

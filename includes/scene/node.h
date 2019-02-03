@@ -17,6 +17,7 @@ public:
 	virtual void SetParent(Node* parent);
 	virtual void DeleteParents();
 	virtual void DeleteChildren();
+	virtual void DeleteChild(Node* node, Node* parent);
 
 	virtual void MakeRoot(void);
 

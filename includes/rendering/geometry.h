@@ -12,7 +12,7 @@ class Geometry
 {
 //Declare public functions
 public:
-	Geometry(Gameobject* gb, fColorRGBA col);
+	Geometry(Gameobject* gb, fColorRGBA col, Meshes mesh);
 	Geometry(Vertex* vertices, ui32* indicies, ui32 vLength, ui32 iLength, Gameobject* gb);
 
 	void Initialize(ID3D11Device* dev);
@@ -22,6 +22,8 @@ public:
 
 	Gameobject* GetGameobject(void);
 	Vertex* GetVertices(void);
+	fColorRGBA GetColor(void);
+	Meshes GetMeshType(void);
 
 	ui32 vLength;
 	ui32 iLength;
@@ -37,6 +39,7 @@ private:
 	Vertex* vertices;
 
 	fColorRGBA color;
+	Meshes meshType;
 
 	ui32* indicies;
 };

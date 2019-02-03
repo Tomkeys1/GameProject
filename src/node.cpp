@@ -15,7 +15,10 @@ Node::Node() :
 void Node::SetParent(Node* parent)
 {
 	//Set this node to the parent of the inputed node.
-	this->parent = parent;
+	if (!this->isRoot)
+		this->parent = parent;
+
+	this->parent->children.push_back(this);
 }
 
 //Void DeleteParents
@@ -45,6 +48,20 @@ void Node::DeleteChildren()
 
 	//Delete this child. Because all children execute this function, all children with all child objects are deleted.
 	delete this;
+}
+
+void Node::DeleteChild(Node* node, Node* parent)
+{
+	if (node)
+	{
+		//Add the inputed node into this nodes children list.
+		this->children.remove(node);
+
+		//If the inputed node isnt the root
+		if (!node->isRoot)
+			//Set the inputed nodes parent to this.
+			node->parent = parent;
+	}
 }
 
 //Void MakeRoot
@@ -160,17 +177,18 @@ void Node::Update()
 	for (Node* child : this->children) 
 	{
 		//Execute its Update function.
-		child->Update();
+		if(child != nullptr)
+			child->Update();
 	}
 }
 
 void Node::Cleanup(void)
 {
-	for (Node* child : this->children)
-	{
-		//Execute its Update function.
-		child->Cleanup();
-	}
+	//for (Node* child : this->children)
+	//{
+	//	//Execute its Update function.
+	//	child->Cleanup();
+	//}
 
 	if (this->parent)
 	{

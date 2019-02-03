@@ -42,6 +42,8 @@ private:
 	real massOfCenter;
 	Math::Vec3 gravityCenter;
 
+	//
+
 	Collision* collision;
 
 	Gameobject* gameobject;

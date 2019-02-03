@@ -27,6 +27,12 @@ typedef uint64_t ui64;
 
 typedef ui32 opSystem;
 
+enum class Meshes
+{
+	BOX,
+	TRIANGLE
+};
+
 struct iVec2
 {
 	ui32 x;

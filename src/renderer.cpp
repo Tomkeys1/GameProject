@@ -191,8 +191,9 @@ void Renderer::InitializeGameobject(Gameobject* gb)
 	gb->GetMesh()->Initialize(dev);
 	gb->GetMaterial()->Initialize(dev);
 
-	if(gb->GetParent()->hasRoot())
-		this->gameObjects.push_back(gb);
+	if(gb->GetParent() != nullptr)
+		if(gb->GetParent()->hasRoot())
+			this->gameObjects.push_back(gb);
 }
 
 Camera* Renderer::GetCamera(void)

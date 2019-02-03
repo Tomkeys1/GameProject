@@ -17,7 +17,9 @@ public:
 
 	ShootingValues& GetShootingValues(void);
 private:
-	Math::Vec3 GetPos(Gameobject* gb);
+	void PlayerShooting(void);
+	void NEnemyShooting(void);
 
+	Math::Vec3 GetPos(Gameobject* gb);
 	ShootingValues shoot;
 };

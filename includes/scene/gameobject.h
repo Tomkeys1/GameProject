@@ -24,10 +24,12 @@ class Gameobject final : public Node
 public:
 	Gameobject
 	(
+		std::string name = "",
 		bool render = true, bool isRoot = false, bool cam = false,
 		Gameobject* parent = nullptr,
 		fColorRGBA col = fColorRGBA{ 0.960f, 0.713f, 0.0f, 1.0f },
 		bool hasCollision = false,
+		Meshes mesh = Meshes::BOX,
 		bool mirror = false
 	);
 	~Gameobject();
@@ -46,12 +48,16 @@ public:
 	void SetCollision(bool b);
 	void SetIsColliding(bool b);
 	void SetIsTrigger(bool b);
+	void SetDeactivate(bool b);
+	void SetActive(bool b, Gameobject* parent = nullptr);
 	void SetHitObject(Gameobject* hit);
 
 	bool hasMesh(void);
 	bool hasCollision(void);
 	bool isColliding(void);
 	bool IsMirror(void);
+	bool isDeactivate(void);
+	bool isActive(void);
 	bool isTrigger(void);
 	bool isVisisble(void);
 	bool inViewport(void);
@@ -71,6 +77,8 @@ public:
 	Shader* GetMaterial(void);
 	Gameobject* GetHitObject(void);
 	Rigidbody* GetRigidbody(void);
+	void CreateCopy(void);
+	Gameobject* CreateCopy(bool getGb);
 
 //Declare private variables.
 private:
@@ -87,10 +95,13 @@ private:
 
 	std::string name;
 	std::string tag; 
+	bool activated = true;
 	bool isMirror = false;
 	bool bMesh;
 	bool collision;
 	bool is_colliding =  false;
 	bool is_trigger = false;
 	bool isRendering = true;
+	bool deactivate = false;
+	ui32 copied;
 };

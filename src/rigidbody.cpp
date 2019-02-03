@@ -60,7 +60,8 @@ void Rigidbody::SetGravityCenter(Gameobject* gb)
 
 void Rigidbody::AddForce(Math::Vec3 direction, real force)
 {
-	this->gameobject->GetTransform().position += direction * CalculateVelocity((Time::deltaTime * (force / this->rigidBody.mass)));
+	real v = CalculateVelocity((force / this->rigidBody.mass));
+	this->gameobject->GetTransform().position += ((direction * v) * Time::deltaTime);
 }
 
 Math::Vec3 Rigidbody::GetImpactDirection()
@@ -108,7 +109,7 @@ void Rigidbody::Gravity(void)
 
 	this->gravity = this->gravityConstant * ((this->rigidBody.mass * this->massOfCenter) / (Math::Distance(this->gameobject->GetTransform().position, this->gravityCenter)) * Math::Distance(this->gameobject->GetTransform().position, this->gravityCenter));
 	
-	this->gameobject->GetTransform().position += this->rigidBody.gravityDir * CalculateVelocity(gravity) * Time::deltaTime;
+	this->gameobject->GetTransform().position += (this->rigidBody.gravityDir * CalculateVelocity(gravity) * Time::deltaTime);
 }
 
 real Rigidbody::CalculateVelocity(real force)

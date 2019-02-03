@@ -16,7 +16,7 @@
 #include "components/health.h"
 
 //Gameobject Constructor.
-Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, fColorRGBA col, bool hasCollision, bool mirror)
+Gameobject::Gameobject(std::string name, bool render, bool isRoot, bool cam, Gameobject* parent, fColorRGBA col, bool hasCollision, Meshes mesh, bool mirror)
 {
 	//Set this gameobjects position, scaling and rotation to 0;
 	this->transform.position = { 0, 0, 0 };
@@ -24,10 +24,8 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 	this->transform.rotation = { 1, 0, 0, 0 };
 	this->eulerRotation = { 0, 0, 0 };
 
-	this->collision = hasCollision;
-	this->tag = "";
-	this->hitObject = nullptr;
-	this->isMirror = mirror;
+	this->name = name;
+
 
 	if (cam)
 		return;
@@ -35,7 +33,7 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 	if (render)
 	{
 		this->material = new Shader();
-		this->mesh = new Geometry(this, col);
+		this->mesh = new Geometry(this, col, mesh);
 		this->bMesh = true;
 	}
 	else
@@ -43,11 +41,12 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 		this->bMesh = false;
 	}
 
-	if (parent != nullptr)
-	{
-		this->SetParent(parent);
-		parent->AddChild(this);
-	}
+	this->copied = 0;
+	this->collision = hasCollision;
+	this->tag = "";
+	this->hitObject = nullptr;
+	this->isMirror = mirror;
+
 
 	this->rigidbody = new Rigidbody(this);
 	this->rigidbody->GetRigidbodyValues().mass = 100.0f;
@@ -56,6 +55,146 @@ Gameobject::Gameobject(bool render, bool isRoot, bool cam, Gameobject* parent, f
 	this->rigidbody->GetRigidbodyValues().dragCoefficient = 0.024f;
 	this->rigidbody->GetRigidbodyValues().airDensity = 1.20f;
 	this->rigidbody->GetRigidbodyValues().gravityDir = Math::Vec3::neg_unit_y;
+
+	if (isRoot)
+	{
+		this->activated = true;
+	}
+	else
+	{
+		this->SetActive(true, parent);	
+	}
+
+}
+
+void Gameobject::CreateCopy(void)
+{
+	std::string tempName = this->name;
+	tempName += '(' + std::to_string(this->copied) + ')';
+	this->copied++;
+
+	Gameobject* temp = new Gameobject(this->name, this->bMesh, false, false, reinterpret_cast<Gameobject*>(this->GetParent()), this->mesh->GetColor(), this->collision, this->mesh->GetMeshType(), this->isMirror);
+	temp->transform = this->transform;
+	temp->rigidbody->GetRigidbodyValues() = this->rigidbody->GetRigidbodyValues();
+	temp->eulerRotation = this->eulerRotation;
+	temp->tag = this->tag;
+	temp->name = tempName;
+	temp->is_trigger = this->is_trigger;
+	temp->isRendering = this->isRendering;
+	temp->modelMatrix = this->modelMatrix;
+
+	Application::GetInstancePtr()->GetScene()->AddGameobject(temp);
+
+	for (Component* com : this->components)
+	{
+		switch (com->GetType())
+		{
+		case ComponentType::Movement:
+		{
+			Movement* mov = new Movement;
+			mov->GetMovementValues() = reinterpret_cast<Movement*>(this->GetComponent(ComponentType::Movement))->GetMovementValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, mov);
+		}
+		break;
+		case ComponentType::Bullet:
+		{
+			Bullet* bul = new Bullet;
+			bul->GetBulletValues() = reinterpret_cast<Bullet*>(this->GetComponent(ComponentType::Bullet))->GetBulletValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, bul);
+		}
+		break;
+		case ComponentType::Shoot:
+		{
+			Shooting* shot = new Shooting;
+			shot->GetShootingValues() = reinterpret_cast<Shooting*>(this->GetComponent(ComponentType::Shoot))->GetShootingValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, shot);
+		}
+		break;
+		case ComponentType::Health:
+		{
+			Health* health = new Health;
+			health->GetHealthValues() = reinterpret_cast<Health*>(this->GetComponent(ComponentType::Health))->GetHealthValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, health);
+		}
+		break;
+		case ComponentType::GravityShot:
+		{
+			GravityShot* gShot = new GravityShot;
+			gShot->GetBulletValues() = reinterpret_cast<GravityShot*>(this->GetComponent(ComponentType::GravityShot))->GetBulletValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, gShot);
+		}
+		break;
+		}
+	}
+
+	Application::GetInstancePtr()->GetRenderer()->InitializeGameobject(temp);
+	temp->SetActive(this->activated);
+}
+
+Gameobject* Gameobject::CreateCopy(bool getGb)
+{
+	std::string tempName = this->name;
+	tempName += '(' + std::to_string(this->copied) + ')';
+	this->copied++;
+
+	Gameobject* temp = new Gameobject(this->name, this->bMesh, false, false, reinterpret_cast<Gameobject*>(this->GetParent()), this->mesh->GetColor(), this->collision, this->mesh->GetMeshType(), this->isMirror);
+	temp->transform = this->transform;
+	temp->rigidbody->GetRigidbodyValues() = this->rigidbody->GetRigidbodyValues();
+	temp->eulerRotation = this->eulerRotation;
+	temp->tag = this->tag;
+	temp->name = tempName;
+	temp->is_trigger = this->is_trigger;
+	temp->isRendering = this->isRendering;
+	temp->modelMatrix = this->modelMatrix;
+	temp->SetActive(this->activated);
+
+	Application::GetInstancePtr()->GetScene()->AddGameobject(temp);
+
+	for (Component* com : this->components)
+	{
+		switch (com->GetType())
+		{
+		case ComponentType::Movement:
+		{
+			Movement* mov = new Movement;
+			mov->GetMovementValues() = reinterpret_cast<Movement*>(this->GetComponent(ComponentType::Movement))->GetMovementValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, mov);
+		}
+		break;
+		case ComponentType::Bullet:
+		{
+			Bullet* bul = new Bullet;
+			bul->GetBulletValues() = reinterpret_cast<Bullet*>(this->GetComponent(ComponentType::Bullet))->GetBulletValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, bul);
+		}
+		break;
+		case ComponentType::Shoot:
+		{
+			Shooting* shot = new Shooting;
+			shot->GetShootingValues() = reinterpret_cast<Shooting*>(this->GetComponent(ComponentType::Shoot))->GetShootingValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, shot);
+		}
+		break;
+		case ComponentType::Health:
+		{
+			Health* health = new Health;
+			health->GetHealthValues() = reinterpret_cast<Health*>(this->GetComponent(ComponentType::Health))->GetHealthValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, health);
+		}
+		break;
+		case ComponentType::GravityShot:
+		{
+			GravityShot* gShot = new GravityShot;
+			gShot->GetBulletValues() = reinterpret_cast<GravityShot*>(this->GetComponent(ComponentType::GravityShot))->GetBulletValues();
+			Application::GetInstancePtr()->GetScene()->AddComponent(temp, gShot);
+		}
+		break;
+		}
+	}
+
+	Application::GetInstancePtr()->GetRenderer()->InitializeGameobject(temp);
+
+	return temp;
 }
 
 Gameobject::~Gameobject()
@@ -66,6 +205,9 @@ Gameobject::~Gameobject()
 //Void Update
 void Gameobject::Update()
 {
+	if (!this->activated)
+		return;
+
 	//Execute the bases Update.
 	Node::Update();
 
@@ -277,6 +419,7 @@ Gameobject * Gameobject::GetHitObject(void)
 	return this->hitObject;
 }
 
+
 Rigidbody* Gameobject::GetRigidbody(void)
 {
 	return this->rigidbody;
@@ -324,6 +467,17 @@ void Gameobject::SetIsTrigger(bool b)
 	this->is_trigger = b;
 }
 
+void Gameobject::SetDeactivate(bool b)
+{
+	this->deactivate = b;
+}
+
+void Gameobject::SetActive(bool b, Gameobject* parent)
+{
+	this->activated = b;
+	Application::GetInstancePtr()->GetScene()->SetActivity(this, parent, b);
+}
+
 void Gameobject::SetHitObject(Gameobject* hit)
 {
 	this->hitObject = hit;
@@ -349,6 +503,16 @@ bool Gameobject::isColliding()
 bool Gameobject::IsMirror(void)
 {
 	return this->isMirror;
+}
+
+bool Gameobject::isDeactivate(void)
+{
+	return this->deactivate;
+}
+
+bool Gameobject::isActive(void)
+{
+	return this->activated;
 }
 
 bool Gameobject::isTrigger(void)

@@ -21,7 +21,7 @@ void Health::Update(void)
 
 	if (this->health.health <= 0.0f)
 	{
-		Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject());
+		Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject(), false);
 	}
 
 	if (this->GetGameObject()->isColliding())
