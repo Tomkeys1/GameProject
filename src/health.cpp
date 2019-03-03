@@ -1,5 +1,9 @@
-#include "components\health.h"
-#include "components\bullet.h"
+//EXTERNAL INCLUDES
+#include <chrono>
+//INTERNAL INCLUDES
+#include "components/enemies/espawnbehaviour.h"
+#include "components/health.h"
+#include "components/bullet.h"
 #include "scene/scene.h"
 #include "application.h"
 
@@ -9,6 +13,8 @@ Health::Health()
 	this->health.damage = 25.0f;
 	this->health.health = 100.0f;
 	this->health.resistance = 1.0f;
+	this->health.shield = 0.0f;
+	this->damaging = false;
 }
 
 void Health::Initialize(Gameobject* gb)
@@ -18,24 +24,18 @@ void Health::Initialize(Gameobject* gb)
 
 void Health::Update(void)
 {
+	Component::Update();
 
-	if (this->health.health <= 0.0f)
+	if (this->health.health <= 0)
 	{
-		Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject(), false);
-	}
-
-	if (this->GetGameObject()->isColliding())
-	{
-		if (this->GetGameObject()->GetHitObject()->GetTag() == "bullet")
-		{
-			this->health.health -= this->health.damage / this->health.resistance;
-			return;
-		}
+		Application::GetInstancePtr()->GetScene()->GetEnemySpawner()->GetDeadEnemies()++;
+		Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject(), true);
 	}
 }
 
 void Health::Cleanup(void)
 {
+	Component::Cleanup();
 }
 
 HealthValues& Health::GetHealthValues(void)

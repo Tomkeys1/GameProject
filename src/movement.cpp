@@ -1,6 +1,8 @@
 
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
+#include "application.h"
+#include "scene/scene.h"
 #include "systems/inputhandler.h"
 #include "components/movement.h"
 #include "typedefs/utils.h"
@@ -28,17 +30,42 @@ void Movement::Update(void)
 	//Execute the components Update function.
 	Component::Update();
 
-	if (!this->GetGameObject()->inViewport())
+	if (this->GetGameObject()->GetTag() == "enemy")
 	{
-		if(this->movement.direction.x > 0.0f)
-			this->GetGameObject()->GetTransform().position.x -= 200.0f;
-		else
-			this->GetGameObject()->GetTransform().position.x += 200.0f;
+		if (!this->GetGameObject()->inViewport())
+		{
+			if (this->movement.direction.x > 0.0f)
+			{
+				this->GetGameObject()->GetTransform().position.x -= 200.0f;
+				this->GetGameObject()->GetTransform().position.y -= 20;
+			}
+			else if (this->movement.direction.x < 0.0f)
+			{
+				this->GetGameObject()->GetTransform().position.x += 200.0f;
+				this->GetGameObject()->GetTransform().position.y -= 20;
+			}
+			else
+				Application::GetInstancePtr()->GetScene()->GetEnd() = true;
+		}
+
+		this->movement.direction = Math::Negate(Math::GetRightVector(this->GetGameObject()->GetEulerRotation()));
+		this->movement.velocity += this->movement.speed;
+
+		this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().movementDir = this->movement.direction;
+		this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = Math::Clamp(this->movement.velocity, -this->movement.maxSpeed, this->movement.maxSpeed);
 	}
+	else
+	{
+		if (!this->GetGameObject()->inViewport())
+		{
+			if (this->movement.direction.x > 0.0f)
+				this->GetGameObject()->GetTransform().position.x -= 200.0f;
+			else
+				this->GetGameObject()->GetTransform().position.x += 200.0f;
+		}
 
-	//Rotate();
-	Move();
-
+		Move();
+	}
 }
 
 void Movement::Cleanup(void)
@@ -79,16 +106,4 @@ void Movement::Move()
 
 	this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().movementDir = this->movement.direction;
 	this->GetGameObject()->GetRigidbody()->GetRigidbodyValues().velocity = Math::Clamp(this->movement.velocity, -this->movement.maxSpeed, this->movement.maxSpeed);
-}
-
-void Movement::Rotate(void)
-{
-	if (Input::GetInstancePtr()->GetKey(KeyCode::E))
-	{
-		this->GetGameObject()->GetEulerRotation().z -= this->movement.rotationSpeed * Time::deltaTime;
-	}
-	else if (Input::GetInstancePtr()->GetKey(KeyCode::Q))
-	{
-		this->GetGameObject()->GetEulerRotation().z += this->movement.rotationSpeed * Time::deltaTime;
-	}
 }

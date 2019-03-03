@@ -1,46 +1,60 @@
 
 //EXTERNAL INCLUDES
-#include <time.h>
+#include <thread>
 //INTERNAL INCLUDES
+#include "physics/rigidbody.h"
 #include "components\enemies\espawnbehaviour.h"
+#include "systems/inputhandler.h"
 #include "typedefs/utils.h"
 #include "application.h"
 #include "scene/scene.h"
-#include "scene/gameobject.h"
 #include "components/shooting.h"
 
 void EnemySpawner::Initialize(void)
 {
 	this->spawn = true;
+	this->seed = 0;
 	this->count = 0;
-	srand(time(NULL));
-
+	this->activeEnemies = 0;
+	this->deadEnemeies = 0;
+	this->timer = 0;
 	CreatePatterns();
 }
 
 void EnemySpawner::Update(void)
 {
+	if (this->seed == 0)
+	{
+		srand(time(NULL));
+		this->seed++;
+	}
+
+
+	//Spawning
 	if (this->spawn)
 	{
-		this->spawn = false;
-
-		std::vector<EnemyPattern*> pattern = this->patterns[this->count];
-
-		for (ui32 i = 0; i < pattern.size(); i++)
+		if (this->timer > 0.0f)
+			this->timer -= 1.0f * Time::deltaTime;
+		if (this->timer <= 0.0f)
 		{
-			switch (pattern[i]->type)
+			this->spawn = false;
+
+			for (ui32 i = 0; i < this->patterns[this->count].size(); i++)
 			{
+				switch (this->patterns[this->count][i]->type)
+				{
 				case EnemyType::NORMAL:
 				{
 					Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetObjectItem("normalEnemies", false);
 
-					temp->GetTransform().position.x = -100.0f + (pattern[i]->xPosInDivision * (50.0f * temp->GetTransform().scaling.x));
-					temp->GetTransform().position.y = 100.0f - (pattern[i]->yPosInDivision * (60.0f * temp->GetTransform().scaling.y));
+					temp->GetTransform().position.x = -100.0f + (this->patterns[this->count][i]->xPosInDivision * (50.0f * temp->GetTransform().scaling.x));
+					temp->GetTransform().position.y = 100.0f - (this->patterns[this->count][i]->yPosInDivision * (60.0f * temp->GetTransform().scaling.y));
 					temp->GetEulerRotation().z = 180.0f;
+					temp->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
 					temp->SetVisi(true);
 					temp->SetActive(true);
 
-					ui32 cooldown = rand() % 15 + 10;
+					ui32 cooldown = rand() % 15 + 5;
 					reinterpret_cast<Shooting*>(temp->GetComponent(ComponentType::Shoot))->GetShootingValues().cooldown = cooldown;
 					reinterpret_cast<Shooting*>(temp->GetComponent(ComponentType::Shoot))->GetShootingValues().timer = cooldown - 5;
 
@@ -51,8 +65,8 @@ void EnemySpawner::Update(void)
 				{
 					Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetObjectItem("normalEnemies", false);
 
-					temp->GetTransform().position.x = -100.0f + (pattern[i]->xPosInDivision * (50.0f * temp->GetTransform().scaling.x));
-					temp->GetTransform().position.y = 100.0f - (pattern[i]->yPosInDivision * (60.0f * temp->GetTransform().scaling.y));
+					temp->GetTransform().position.x = -100.0f + (this->patterns[this->count][i]->xPosInDivision * (50.0f * temp->GetTransform().scaling.x));
+					temp->GetTransform().position.y = 100.0f - (this->patterns[this->count][i]->yPosInDivision * (60.0f * temp->GetTransform().scaling.y));
 					temp->SetVisi(true);
 					temp->SetActive(true);
 					break;
@@ -62,18 +76,26 @@ void EnemySpawner::Update(void)
 				{
 					Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetObjectItem("normalEnemies", false);
 
-					temp->GetTransform().position.x = -100.0f + (pattern[i]->xPosInDivision * (50.0f * temp->GetTransform().scaling.x));
-					temp->GetTransform().position.y = 100.0f - (pattern[i]->yPosInDivision * (60.0f * temp->GetTransform().scaling.y));
+					temp->GetTransform().position.x = -100.0f + (this->patterns[this->count][i]->xPosInDivision * (50.0f * temp->GetTransform().scaling.x));
+					temp->GetTransform().position.y = 100.0f - (this->patterns[this->count][i]->yPosInDivision * (60.0f * temp->GetTransform().scaling.y));
 					temp->SetVisi(true);
 					temp->SetActive(true);
 					break;
 				}
+				}
 			}
 		}
 
-		this->count++;
+		this->activeEnemies = this->patterns[this->count].size();
+	}
+	if (this->deadEnemeies == this->activeEnemies)
+	{
+		this->deadEnemeies = 0;
+		this->spawn = true;
+		this->timer = 2.0f;
 	}
 
+	//Movement
 }
 
 void EnemySpawner::Cleanup(void)
@@ -93,6 +115,11 @@ void EnemySpawner::Cleanup(void)
 std::vector<EnemyPattern*> EnemySpawner::GetPattern(ui32 id)
 {
 	return this->patterns[id];
+}
+
+ui32& EnemySpawner::GetDeadEnemies(void)
+{
+	return this->deadEnemeies;
 }
 
 void EnemySpawner::CreatePatterns(void)

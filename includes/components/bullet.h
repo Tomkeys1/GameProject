@@ -1,5 +1,6 @@
 #pragma once
 //EXTERNAL INCLUDES
+#include <thread>
 //INTERNAL INCLUDES
 #include "component.h"
 
@@ -16,5 +17,8 @@ public:
 	BulletValues& GetBulletValues(void);
 
 private:
+	void Deflect(void);
+	bool deflecting = false;
+	std::thread mirrorThread;
 	BulletValues bullet;
 };

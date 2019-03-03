@@ -3,6 +3,7 @@
 //EXTERNAL INCLUDES
 #include <map>
 #include <vector>
+#include <thread>
 //INTERNAL INCLUDES
 #include "typedefs/types.h"
 
@@ -42,8 +43,14 @@ public:
 	Gameobject* GetGameobject(std::string name);
 	Gameobject* GetGameobject();
 	Gameobject* GetObjectItem(std::string objectPool, bool deleteObject);
+	EnemySpawner* GetEnemySpawner(void);
+	bool& GetPaused();
+	bool& GetEnd();
 
 private:
+	bool paused = false;
+	bool end = false;
+
 	Gameobject* root;
 	EnemySpawner* eSpawner;
 	std::map <std::string, std::vector<Gameobject*>> objectPools;

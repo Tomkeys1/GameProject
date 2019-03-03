@@ -14,6 +14,7 @@
 ui32 main(ui32 argc, char** argv)
 #endif
 {
+	srand(time(NULL));
 	std::string gamepathstr = static_cast<std::string>(argv[0]);
 	for (char& sign : gamepathstr)
 	{

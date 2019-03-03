@@ -1,5 +1,6 @@
 
 //EXTERNAL INCLUDES
+#include <thread>
 //INTERNAL INCLUDES
 #include "scene/scene.h"
 #include "components/health.h"
@@ -33,22 +34,20 @@ void Scene::Initialize(void)
 	this->gameObjects["player1"]->SetTag("player");
 
 	Movement* mov = new Movement;
-	mov->GetMovementValues().speed = 1000.0f;
-	mov->GetMovementValues().maxSpeed = 200000.0f;
-	mov->GetMovementValues().rotationSpeed = 80.0f;
+	mov->GetMovementValues().speed = 10000.0f;
+	mov->GetMovementValues().maxSpeed = 220000.0f;
 	AddComponent(this->gameObjects["player1"], mov);
 
 	Shooting* shot = new Shooting;
 	shot->GetShootingValues().growth = 2.0f;
-	shot->GetShootingValues().time = 3.0f;
-	shot->GetShootingValues().speed = 700.0f;
+	shot->GetShootingValues().time = 2.0f;
+	shot->GetShootingValues().speed = 5000.0f;
 	AddComponent(this->gameObjects["player1"], shot);
 
-
-	////TestMirror
-	AddGameobject("mirror", CreateMode::NORMAL, this->gameObjects["player1"], Color::GetColor(ColorCode::RED), true, Meshes::BOX, true);
-	this->gameObjects["mirror"]->GetTransform().position = { 30, 70.0f, 0.0f };
-	this->gameObjects["mirror"]->GetTransform().scaling = { 1.0f, 1.0f, 0 };
+	Health* playerHealth = new Health;
+	playerHealth->GetHealthValues().health = 200;
+	playerHealth->GetHealthValues().damage = 10;
+	AddComponent(this->gameObjects["player1"], playerHealth);
 
 	//Ground
 	AddGameobject("ground", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::BLACK), true, Meshes::BOX, false);
@@ -76,15 +75,23 @@ void Scene::Initialize(void)
 	this->gameObjects["normalEnemy"]->GetTransform().scaling = { 0.3f, 0.3f, 0 };
 	this->gameObjects["normalEnemy"]->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
 	this->gameObjects["normalEnemy"]->GetRigidbody()->GetRigidbodyValues().gravityEnabled = false;
-	this->gameObjects["normalEnemy"]->SetTag("nEnemy");
+	this->gameObjects["normalEnemy"]->GetRigidbody()->GetRigidbodyValues().mass = 100.0f;
+	this->gameObjects["normalEnemy"]->SetTag("enemy");
 	this->gameObjects["normalEnemy"]->SetActive(false);
 	this->gameObjects["normalEnemy"]->SetVisiblity(false);
 
 	Shooting* nEShot = new Shooting;
-	nEShot->GetShootingValues().speed = 1000.0f;
-	nEShot->GetShootingValues().time = 5.0f;
+	nEShot->GetShootingValues().bulletSpeed = 1500;
+	nEShot->GetShootingValues().time = 3.0f;
 	AddComponent(this->gameObjects["normalEnemy"], nEShot);
 
+	Health* nEHealth = new Health;
+	AddComponent(this->gameObjects["normalEnemy"], nEHealth);
+
+	Movement* nEMov = new Movement;
+	nEMov->GetMovementValues().speed = 100;
+	nEMov->GetMovementValues().maxSpeed = 10000.0f;
+	AddComponent(this->gameObjects["normalEnemy"], nEMov);
 
 	//Object Pools
 	this->CreateObjectPool("bullets", 2000, this->gameObjects["bullet"]);
@@ -92,6 +99,7 @@ void Scene::Initialize(void)
 
 
 	//Enemies
+
 	this->eSpawner = new EnemySpawner;
 	this->eSpawner->Initialize();
 } 
@@ -166,7 +174,7 @@ void Scene::AddComponent(Gameobject* gb, Component* com)
 
 void Scene::DeleteGameobject(Gameobject* gb, bool deactivate)
 {
-	gb->SetDeactivate(true);
+	gb->SetDeactivate(deactivate);
 	this->deleteGb.push_back(gb);
 }
 
@@ -194,10 +202,13 @@ void Scene::DeleteGameobjects(void)
 		{
 			if (gb->isDeactivate())
 			{
+				if (gb->GetTag() == "enemy")
+					LOG("er");
 				gb->SetActive(false);
 			}
 			else
 			{
+
 				Node* g = this->gameObjects[gb->GetName()]->GetParent();
 
 				this->gameObjects[gb->GetName()]->GetParent()->GetChildren().remove(gb);
@@ -246,11 +257,32 @@ Gameobject* Scene::GetObjectItem(std::string objectPool, bool deleteObject)
 	return nullptr;
 }
 
+EnemySpawner* Scene::GetEnemySpawner(void)
+{
+	return this->eSpawner;
+}
+
+bool & Scene::GetPaused()
+{
+	return this->paused;
+}
+
+bool & Scene::GetEnd()
+{
+	return this->end;
+}
+
 void Scene::Update(real deltaTime)
 {
 	Time::deltaTime = deltaTime;
-	this->eSpawner->Update();
-	this->root->Update();
+
+	if (!this->paused && !this->end)
+	{
+		std::thread enemyThread(&EnemySpawner::Update, this->eSpawner);
+		std::thread gameobjectThread(&Gameobject::Update, this->root);
+		gameobjectThread.join();
+		enemyThread.join();
+	}
 }
 
 void Scene::Cleanup(void)

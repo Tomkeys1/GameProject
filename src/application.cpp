@@ -14,6 +14,7 @@
 //Declare Application as a Singleton.
 DECLARE_SINGLETON(Application)
 
+
 //Void Initialize
 void Application::Initialize(char* title, iVec2 resolution, ui32 displayID)
 {
@@ -50,24 +51,23 @@ void Application::Update(void)
 		currentTime = newTime;
 
 		Window::GetInstancePtr()->DispatchMessages();
-		if (Input::GetInstancePtr()->GetKeyUp(KeyCode::P))
+		if (Input::GetInstancePtr()->GetKeyUp(KeyCode::Escape))
 		{
-			this->running = false;
-				break;
-			}
+			this->scene->GetPaused() = !this->scene->GetPaused();
+		}
 
 		// Update Gamestate && Update Renderer
 		std::thread gamestateThread(&Scene::Update,this->scene, delta_time);
 		std::thread renderThread(&Renderer::Render, Application::renderer);
 		gamestateThread.join();
-		renderThread.join();
 
 		if (Input::GetInstancePtr()->GetUpState())
 			Input::GetInstancePtr()->EradicateUpKeys();
 
+		renderThread.join();
 		this->scene->DeleteGameobjects();
-		
-		STOP_TIMER("Update time taken: ");
+
+		STOP_TIMER("Time Taken: ")
 	}
 
 }

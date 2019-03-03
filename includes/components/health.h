@@ -2,6 +2,7 @@
 #pragma once
 
 //EXTERNAL INCLUDES
+#include <thread>
 //INTERNAL INCLUDES
 #include "component.h"
 
@@ -18,5 +19,8 @@ public:
 	HealthValues& GetHealthValues(void);
 
 private:
+	void Damage(void);
+	bool damaging = false;
+	std::thread damageThread;
 	HealthValues health;
 };

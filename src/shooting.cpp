@@ -1,6 +1,5 @@
 //EXTERNAL INCLUDES
 #include <chrono>
-#include <time.h>
 #include <iostream>
 //INTERNAL INCLUDES
 #include "systems/inputhandler.h"
@@ -45,7 +44,7 @@ void Shooting::Update(void)
 		{
 			PlayerShooting();
 		}
-		else if (this->GetGameObject()->GetTag() == "nEnemy")
+		else if (this->GetGameObject()->GetTag() == "enemy")
 		{
 			NEnemyShooting();
 		}

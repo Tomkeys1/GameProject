@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 //INTERNAL INCLUDES
+#include "scene/gameobject.h"
 #include "typedefs/types.h"
 #include "typedefs/utils.h"
 #include "components/enemies/enemypatterns.h"
@@ -18,8 +19,15 @@ public:
 
 
 	std::vector<EnemyPattern*> GetPattern(ui32 id);
+	ui32& GetDeadEnemies(void);
+
+
 private:
 	std::map<ui32, std::vector<EnemyPattern*>> patterns;
+	ui32 activeEnemies;
+	ui32 deadEnemeies;
 	bool spawn;
 	real count;
+	real timer;
+	ui8 seed;
 };
