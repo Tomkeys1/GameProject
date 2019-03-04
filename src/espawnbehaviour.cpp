@@ -2,6 +2,7 @@
 //EXTERNAL INCLUDES
 #include <thread>
 //INTERNAL INCLUDES
+#include "rendering/window.h"
 #include "physics/rigidbody.h"
 #include "components\enemies\espawnbehaviour.h"
 #include "systems/inputhandler.h"
@@ -47,8 +48,11 @@ void EnemySpawner::Update(void)
 				{
 					Gameobject* temp = Application::GetInstancePtr()->GetScene()->GetObjectItem("normalEnemies", false);
 
-					temp->GetTransform().position.x = -100.0f + (this->patterns[this->count][i]->xPosInDivision * (50.0f * temp->GetTransform().scaling.x));
-					temp->GetTransform().position.y = 100.0f - (this->patterns[this->count][i]->yPosInDivision * (60.0f * temp->GetTransform().scaling.y));
+					real test = (50.0f * temp->GetTransform().scaling.x);
+					real test2 = (60.0f * temp->GetTransform().scaling.y);
+
+					temp->GetTransform().position.x = -100.0f + (this->patterns[this->count][i]->xPosInDivision * 15);
+					temp->GetTransform().position.y = 100.0f - (this->patterns[this->count][i]->yPosInDivision * 18);
 					temp->GetEulerRotation().z = 180.0f;
 					temp->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
 					temp->SetVisi(true);

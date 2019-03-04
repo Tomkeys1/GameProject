@@ -82,6 +82,11 @@ struct GravityShotValues
 	real cooldown;
 	real timeToExplode;
 
+	bool activated;
+	real speed;
+	real time;
+	Math::Vec3 dir;
+
 	Math::Vec3 direction;
 	Math::Vec3 gravityDirection;
 };

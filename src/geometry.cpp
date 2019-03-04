@@ -1,6 +1,8 @@
 
 //EXTERNAL INCLUDES
 //INTERNAL INCLUDES
+#include "application.h"
+#include "rendering/renderer.h"
 #include "rendering/geometry.h"
 #include "typedefs/utils.h"
 
@@ -142,15 +144,16 @@ void Geometry::Cleanup(void)
 
 void Geometry::SetColor(fColorRGBA color)
 {
-	this->vertices[0].color = color;
-	this->vertices[1].color = color;
-	this->vertices[2].color = color;
-	this->vertices[3].color = color;
+	Vertex* lockedBuffer;
 
-	this->color = color;
+ 	for (int i = 0; i < this->vLength; i++)
+	{
+		this->vertices[i].color = color;
+	}
 
-	this->vertexData->pSysMem = vertices;
-}
+	Application::GetInstancePtr()->GetRenderer()->GetDeviceContext()->UpdateSubresource(this->vertexBuffer, 1, NULL, &this->vertices, 0, 0);
+
+ }
 
 Gameobject* Geometry::GetGameobject(void)
 {

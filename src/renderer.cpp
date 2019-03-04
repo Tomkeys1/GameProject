@@ -196,6 +196,11 @@ void Renderer::InitializeGameobject(Gameobject* gb)
 			this->gameObjects.push_back(gb);
 }
 
+ID3D11DeviceContext * Renderer::GetDeviceContext(void)
+{
+	return this->devcon;
+}
+
 Camera* Renderer::GetCamera(void)
 {
 	return this->camera;

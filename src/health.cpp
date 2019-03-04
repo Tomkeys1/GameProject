@@ -1,6 +1,8 @@
 //EXTERNAL INCLUDES
 #include <chrono>
 //INTERNAL INCLUDES
+#include "typedefs/color.h"
+#include "rendering/geometry.h"
 #include "components/enemies/espawnbehaviour.h"
 #include "components/health.h"
 #include "components/bullet.h"
@@ -28,8 +30,9 @@ void Health::Update(void)
 
 	if (this->health.health <= 0)
 	{
-		Application::GetInstancePtr()->GetScene()->GetEnemySpawner()->GetDeadEnemies()++;
-		Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject(), true);
+		this->GetGameObject()->GetMesh()->SetColor(Color::GetColor(ColorCode::GREEN));
+		//Application::GetInstancePtr()->GetScene()->GetEnemySpawner()->GetDeadEnemies()++;
+		//Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject(), true);
 	}
 }
 

@@ -23,6 +23,9 @@ public:
 	void AddDisplay(const Display& display);
 	Display* GetDisplay(ui32 id) const;
 
+	real GetWidth();
+	real GetHeight();
+
 //Declare protected variables.
 protected:
 	HWND handle;

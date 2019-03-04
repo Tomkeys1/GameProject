@@ -163,3 +163,13 @@ Display* Window::GetDisplay(ui32 id) const
 	//Return a display pojnter onto this windows displays list at the inputed index.
 	return const_cast<Display*>(&this->displays[id]);
 }
+
+real Window::GetWidth()
+{
+	return this->widthOfWindow;
+}
+
+real Window::GetHeight()
+{
+	return this->heightOfWindow;
+}

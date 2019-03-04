@@ -1,6 +1,7 @@
 
 #pragma once
 //EXTERNAL INCLUDES
+#include <thread>
 //INTERNAL INCLUDES
 #include "components/component.h"
 
@@ -18,5 +19,9 @@ public:
 	GravityShotValues& GetBulletValues(void);
 
 private:
+	void Deflect(void);
+	bool deflecting = false;
+	std::thread mirrorThread;
 	GravityShotValues gravityShot;
+	Gameobject* origin;
 };
