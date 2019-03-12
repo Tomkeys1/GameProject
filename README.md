@@ -1,7 +1,7 @@
 # GameProject
 GameProject from Scratch. C++ directX.
 
-Welcome to this project. This will be a complete game in C++. I started this from scratch creating everything myself except for the deep functions for window creation, where I used some parts of the window.h and the render Functions from the directx libary.
+Welcome to this project. This will be a complete game in C++. I started this from scratch creating everything myself except for the deep functions for window creation, where I used some parts of the window.h and the render Functions from the directx libary. For multithreading I am using the std::thread and for timesteps and time tasks in general I use std::chrono. I use std::vector list and map aswell as string.
 
 The project concept is a space invader clone with a leauge of legends ability system. 
 The character has 4 abilities on Q, W, E and R. Aswell as a normal attack which is a normal shot just like in any space invader clone. If you wish to see the specific ability designs then text me.
