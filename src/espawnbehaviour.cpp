@@ -52,7 +52,7 @@ void EnemySpawner::Update(void)
 					real test2 = (60.0f * temp->GetTransform().scaling.y);
 
 					temp->GetTransform().position.x = -100.0f + (this->patterns[this->count][i]->xPosInDivision * 15);
-					temp->GetTransform().position.y = 100.0f - (this->patterns[this->count][i]->yPosInDivision * 18);
+					temp->GetTransform().position.y = 100.0f - (this->patterns[this->count][i]->yPosInDivision * 20);
 					temp->GetEulerRotation().z = 180.0f;
 					temp->GetRigidbody()->GetRigidbodyValues().isEnabled = true;
 					temp->SetVisi(true);

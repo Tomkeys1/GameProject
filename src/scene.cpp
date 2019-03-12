@@ -50,7 +50,7 @@ void Scene::Initialize(void)
 	AddComponent(this->gameObjects["player1"], playerHealth);
 
 	//Ground
-	AddGameobject("ground", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::BLACK), true, Meshes::BOX, false);
+	AddGameobject("ground", CreateMode::NORMAL, nullptr, Color::GetColor(ColorCode::BLACK), true, Meshes::BOX, true);
 	this->gameObjects["ground"]->GetTransform().position = { 0, -100, 0.0f };
 	this->gameObjects["ground"]->GetTransform().scaling = { 100.0f, 0.50f, 0 };
 

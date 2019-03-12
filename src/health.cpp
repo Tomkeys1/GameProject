@@ -30,9 +30,9 @@ void Health::Update(void)
 
 	if (this->health.health <= 0)
 	{
-		this->GetGameObject()->GetMesh()->SetColor(Color::GetColor(ColorCode::GREEN));
-		//Application::GetInstancePtr()->GetScene()->GetEnemySpawner()->GetDeadEnemies()++;
-		//Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject(), true);
+		//this->GetGameObject()->GetMesh()->SetColor(Color::GetColor(ColorCode::GREEN));
+		Application::GetInstancePtr()->GetScene()->GetEnemySpawner()->GetDeadEnemies()++;
+		Application::GetInstancePtr()->GetScene()->DeleteGameobject(this->GetGameObject(), true);
 	}
 }
 
